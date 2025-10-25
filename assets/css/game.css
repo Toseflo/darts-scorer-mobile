@@ -1,0 +1,152 @@
+/* Game page specific styles */
+
+.player-active {
+    box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.6);
+    border-color: #3B82F6;
+}
+
+.keypad-btn {
+    border: none;
+    cursor: pointer;
+    color: white;
+}
+
+.keypad-btn:active {
+    transform: scale(0.95);
+    background-color: #374151;
+}
+
+.keypad, .player-panel, .turn-display {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#app {
+    height: 100vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+}
+
+#gameScreen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Game-specific component classes */
+.turn-display {
+    background-color: rgb(31 41 55);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.turn-total {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: rgb(107 114 128);
+    padding-right: 1rem;
+}
+
+.multiplier-btn {
+    font-size: 1.125rem;
+    font-weight: 700;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+}
+
+.btn-triple {
+    background-color: rgb(55 65 81);
+    color: rgb(147 197 253);
+}
+
+.btn-double {
+    background-color: rgb(55 65 81);
+    color: rgb(134 239 172);
+}
+
+.number-btn {
+    background-color: rgb(75 85 99);
+    font-size: 1.25rem;
+    font-weight: 700;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+}
+
+.special-btn {
+    font-size: 1.125rem;
+    font-weight: 700;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+}
+
+.btn-undo {
+    background-color: rgb(202 138 4);
+}
+
+.btn-next {
+    background-color: rgb(22 163 74);
+}
+
+.btn-settings-game {
+    background-color: rgb(55 65 81);
+    color: white;
+    font-weight: 500;
+    padding: 0.375rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-settings-game:hover {
+    background-color: rgb(75 85 99);
+}
+
+.btn-reset {
+    background-color: rgb(185 28 28);
+    color: white;
+    font-weight: 500;
+    padding: 0.375rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-reset:hover {
+    background-color: rgb(153 27 27);
+}
+
+.select-field {
+    background-color: rgb(55 65 81);
+    border: 1px solid rgb(75 85 99);
+    border-radius: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    color: white;
+}
+
+.game-over-message {
+    font-size: 1.125rem;
+    margin-bottom: 1.5rem;
+}
+
+.winner-name {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: rgb(250 204 21);
+    margin-bottom: 1rem;
+}
+
+

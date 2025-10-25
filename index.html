@@ -6,90 +6,60 @@
     <title>Darts Scorer - Setup</title>
     <link rel="icon" type="image/png" href="assets/icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <style>
-        /* Prevent scrolling and handle mobile browser bars */
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-        }
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .main-container {
-            height: 100vh;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
-        }
-        @supports (height: 100dvh) {
-            .main-container {
-                height: 100dvh; /* Dynamic viewport height for mobile browsers */
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/setup.css">
 </head>
 <body class="bg-gray-900 text-white" data-i18n-title="title_setup">
 
     <div class="main-container">
-    <div class="w-full max-w-md p-6 space-y-6">
-        <h1 class="text-4xl font-bold text-center text-blue-400" data-i18n="main_title">Darts Scorer</h1>
+        <div class="w-full max-w-md p-6 space-y-6">
+            <h1 class="page-title" data-i18n="main_title">Darts Scorer</h1>
 
-        <!-- Game Settings -->
-        <div class="bg-gray-800 p-4 rounded-lg space-y-4">
-            <div>
-                <label for="game-points" class="block text-sm font-medium text-gray-300" data-i18n="points">Punkte</label>
-                <input type="number" id="game-points" value="501" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <!-- Game Settings -->
+            <div class="settings-box space-y-4">
+                <div>
+                    <label for="game-points" class="label-text" data-i18n="points">Punkte</label>
+                    <input type="number" id="game-points" value="501" class="input-field">
+                </div>
+
+                <div>
+                    <label class="label-text" data-i18n="players">Spieler</label>
+                    <div id="player-list" class="space-y-2 mt-1">
+                        <!-- Player inputs will be injected here by JavaScript -->
+                    </div>
+                    <button id="add-player" class="mt-2 w-full btn-secondary" data-i18n="add_player">
+                        + Spieler hinzufügen
+                    </button>
+                </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-300" data-i18n="players">Spieler</label>
-                <div id="player-list" class="space-y-2 mt-1">
-                    <!-- Player inputs will be injected here by JavaScript -->
-                </div>
-                <button id="add-player" class="mt-2 w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg text-sm shadow transition duration-200" data-i18n="add_player">
-                    + Spieler hinzufügen
+            <!-- Action Buttons -->
+            <div class="flex space-x-4">
+                <button id="settings-btn" class="w-1/4 btn-icon" title="Einstellungen">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" stroke="currentColor" style="fill: none;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </button>
+                <button id="start-game" class="w-3/4 btn-primary" data-i18n="start_game">
+                    Spiel starten
                 </button>
             </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex space-x-4">
-            <button id="settings-btn" class="w-1/4 bg-gray-700 hover:bg-gray-600 p-3 rounded-lg flex items-center justify-center" title="Einstellungen">
-                <svg class="h-6 w-6" viewBox="0 0 24 24" stroke="currentColor" style="fill: none;">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-            </button>
-            <button id="start-game" class="w-3/4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-lg shadow-lg transition duration-200" data-i18n="start_game">
-                Spiel starten
-            </button>
         </div>
     </div>
 
     <!-- Settings Modal will be loaded dynamically -->
 
     <!-- Custom Confirm Dialog -->
-    <div id="confirm-dialog" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
-        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-sm text-center shadow-2xl">
-            <p id="confirm-message" class="text-lg mb-6 text-gray-200"></p>
-            <div class="flex space-x-3">
-                <button id="confirm-no-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg" data-i18n="no">Nein</button>
-                <button id="confirm-yes-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg" data-i18n="yes">Ja</button>
+    <div id="confirm-dialog" class="hidden modal-overlay">
+        <div class="modal-box modal-box-centered">
+            <p id="confirm-message" class="confirm-message"></p>
+            <div class="flex-row space-x-3">
+                <button id="confirm-no-btn" class="btn-confirm-no" data-i18n="no">Nein</button>
+                <button id="confirm-yes-btn" class="btn-confirm-yes" data-i18n="yes">Ja</button>
             </div>
         </div>
     </div>
-    </div> <!-- Close main-container -->
 
     <script src="assets/js/storage.js"></script>
     <script src="assets/js/settings-modal-loader.js"></script>

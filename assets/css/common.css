@@ -1,0 +1,207 @@
+/* Common styles for both setup and game pages */
+
+/* Prevent scrolling and handle mobile browser bars */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Support for dynamic viewport height on mobile browsers */
+@supports (height: 100dvh) {
+    .main-container,
+    #app {
+        height: 100dvh !important;
+    }
+}
+
+/* Common utility classes */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 50;
+}
+
+.modal-box {
+    background-color: rgb(31 41 55);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 24rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modal-box-centered {
+    text-align: center;
+}
+
+.modal-box-large {
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    text-align: center;
+    color: rgb(96 165 250);
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    color: rgb(96 165 250);
+    margin-bottom: 1rem;
+}
+
+.label-text {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgb(209 213 219);
+}
+
+.flex-row {
+    display: flex;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.overflow-y-auto {
+    overflow-y: auto;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.mt-1 {
+    margin-top: 0.25rem;
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+.mt-auto {
+    margin-top: auto;
+}
+
+.mr-1 {
+    margin-right: 0.25rem;
+}
+
+.mr-2 {
+    margin-right: 0.5rem;
+}
+
+.my-4 {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.space-x-2 > * + * {
+    margin-left: 0.5rem;
+}
+
+.space-x-3 > * + * {
+    margin-left: 0.75rem;
+}
+
+.space-x-4 > * + * {
+    margin-left: 1rem;
+}
+
+.space-y-2 > * + * {
+    margin-top: 0.5rem;
+}
+
+.space-y-3 > * + * {
+    margin-top: 0.75rem;
+}
+
+.space-y-4 > * + * {
+    margin-top: 1rem;
+}
+
+.space-y-6 > * + * {
+    margin-top: 1.5rem;
+}
+
+/* Common button styles used in both pages */
+.btn-confirm-no,
+.btn-modal-close {
+    flex: 1;
+    width: 100%;
+    background-color: rgb(75 85 99);
+    color: white;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-confirm-no:hover,
+.btn-modal-close:hover {
+    background-color: rgb(55 65 81);
+}
+
+.btn-confirm-yes,
+.btn-modal-action {
+    flex: 1;
+    width: 100%;
+    background-color: rgb(37 99 235);
+    color: white;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-confirm-yes:hover,
+.btn-modal-action:hover {
+    background-color: rgb(29 78 216);
+}
+
+.btn-modal-action-bold {
+    font-weight: 700;
+    padding: 0.75rem 1rem;
+}
+
+
