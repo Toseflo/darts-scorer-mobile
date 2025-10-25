@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Determine base path for assets based on current location
+    const basePath = window.location.pathname.includes('/game/') ? '../assets' : 'assets';
+
     const translations = {};
     // To add a new language:
     // 1. Create a new JSON file in assets/lang/ (e.g., fr.json)
@@ -59,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (const lang of availableLanguages) {
             try {
-                const response = await fetch(`assets/lang/${lang}.json`);
+                const response = await fetch(`${basePath}/lang/${lang}.json`);
                 if (response.ok) {
                     /** @type {{language_name?: string}} */
                     const data = await response.json();
@@ -112,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadTranslations = async (lang) => {
         try {
-            const response = await fetch(`assets/lang/${lang}.json`);
+            const response = await fetch(`${basePath}/lang/${lang}.json`);
             if (!response.ok) {
                 console.error(`Could not load ${lang}.json`);
                 // Fallback to English if the selected language fails to load

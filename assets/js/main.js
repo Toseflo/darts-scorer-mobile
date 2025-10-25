@@ -1,3 +1,16 @@
+// Navigation helper function
+function navigateToGame() {
+    let path = window.location.pathname;
+    if (path.endsWith("index.html")) {
+        path = path.substring(0, path.length - 10);
+    }
+    // If path ends with /, remove it
+    if (path.endsWith("/")) {
+        path = path.substring(0, path.length - 1);
+    }
+    window.location.href = path + "/game";
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const playerList = document.getElementById('player-list');
     const addPlayerBtn = document.getElementById('add-player');
@@ -84,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         localStorage.setItem('dartsGameSettings', JSON.stringify(gameSettings));
-        window.location.href = 'game.html';
+        navigateToGame();
     });
 
     initPlayers();

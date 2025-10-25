@@ -1,3 +1,23 @@
+// Navigation helper function
+function navigateToSetup() {
+    let path = window.location.pathname;
+    if (path.endsWith("index.html")) {
+        path = path.substring(0, path.length - 10);
+    }
+    if (path.endsWith("/")) {
+        path = path.substring(0, path.length - 1);
+    }
+    // Remove /game from the path
+    if (path.endsWith("/game")) {
+        path = path.substring(0, path.length - 5);
+    }
+    // If path is empty, use root
+    if (!path || path === '') {
+        path = '/';
+    }
+    window.location.href = path;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const get = (id) => document.getElementById(id);
@@ -29,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let CHECKOUTS = {}; // Checkout data loaded from JSON
 
     // --- Initial Load ---
-    fetch('assets/data/checkouts.json')
+    fetch('../assets/data/checkouts.json')
         .then(response => response.json())
         .then(data => {
             CHECKOUTS = data;
@@ -49,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function init() {
         const settings = JSON.parse(localStorage.getItem('dartsGameSettings'));
         if (!settings) {
-            window.location.href = 'index.html';
+            navigateToSetup();
             return;
         }
 
@@ -306,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetGame() {
         localStorage.removeItem('dartsGameState');
         localStorage.removeItem('dartsGameSettings');
-        window.location.href = 'index.html';
+        navigateToSetup();
     }
 
     function saveState() {
