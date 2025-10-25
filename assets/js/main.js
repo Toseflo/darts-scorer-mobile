@@ -11,6 +11,16 @@ function navigateToGame() {
     window.location.href = path + "/game";
 }
 
+// Project identifier for localStorage to avoid conflicts with other projects on same domain
+const PROJECT_PREFIX = 'dartsScorer_';
+
+// Helper functions for localStorage with project prefix
+const storage = {
+    getItem: (key) => localStorage.getItem(PROJECT_PREFIX + key),
+    setItem: (key, value) => localStorage.setItem(PROJECT_PREFIX + key, value),
+    removeItem: (key) => localStorage.removeItem(PROJECT_PREFIX + key)
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const playerList = document.getElementById('player-list');
     const addPlayerBtn = document.getElementById('add-player');
@@ -26,11 +36,41 @@ document.addEventListener('DOMContentLoaded', () => {
         closeModalBtn = document.getElementById('close-modal-btn');
 
         if (settingsModal && closeModalBtn) {
-            // Set default values
+            // Load saved settings if they exist
+            const savedSettings = JSON.parse(storage.getItem('gameSettings'));
+
+            const doubleInCheck = document.getElementById('double-in-check');
             const doubleOutCheck = document.getElementById('double-out-check');
-            if (doubleOutCheck && !doubleOutCheck.hasAttribute('data-initialized')) {
-                doubleOutCheck.checked = true;
-                doubleOutCheck.setAttribute('data-initialized', 'true');
+            const inputModeSelect = document.getElementById('input-mode-select');
+
+            if (savedSettings) {
+                // Apply saved settings
+                if (doubleInCheck) doubleInCheck.checked = savedSettings.doubleIn || false;
+                if (doubleOutCheck) doubleOutCheck.checked = savedSettings.doubleOut !== undefined ? savedSettings.doubleOut : true;
+                if (inputModeSelect) inputModeSelect.value = savedSettings.inputMode || 'field';
+            } else {
+                // Set default values only if no saved settings
+                if (doubleOutCheck && !doubleOutCheck.hasAttribute('data-initialized')) {
+                    doubleOutCheck.checked = true;
+                    doubleOutCheck.setAttribute('data-initialized', 'true');
+                }
+            }
+
+            // Add event listeners to save settings when changed
+            if (doubleInCheck) {
+                doubleInCheck.addEventListener('change', () => {
+                    updateSetupSettings();
+                });
+            }
+            if (doubleOutCheck) {
+                doubleOutCheck.addEventListener('change', () => {
+                    updateSetupSettings();
+                });
+            }
+            if (inputModeSelect) {
+                inputModeSelect.addEventListener('change', () => {
+                    updateSetupSettings();
+                });
             }
 
             closeModalBtn.addEventListener('click', () => {
@@ -47,6 +87,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize modal (should be loaded synchronously by now)
     initSettingsModal();
+
+    const updateSetupSettings = () => {
+        const doubleInCheck = document.getElementById('double-in-check');
+        const doubleOutCheck = document.getElementById('double-out-check');
+        const inputModeSelect = document.getElementById('input-mode-select');
+
+        let currentSettings = JSON.parse(storage.getItem('gameSettings'));
+        if (!currentSettings) {
+            // Create default settings if none exist
+            currentSettings = {
+                points: 501,
+                players: [],
+                doubleIn: false,
+                doubleOut: true,
+                inputMode: 'field',
+                nextPlayerMode: 'next'
+            };
+        }
+
+        // Update settings with current values
+        if (doubleInCheck) currentSettings.doubleIn = doubleInCheck.checked;
+        if (doubleOutCheck) currentSettings.doubleOut = doubleOutCheck.checked;
+        if (inputModeSelect) currentSettings.inputMode = inputModeSelect.value;
+
+        storage.setItem('gameSettings', JSON.stringify(currentSettings));
+    };
 
     const createPlayerInput = (playerNumber) => {
         const playerDiv = document.createElement('div');
@@ -122,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
             nextPlayerMode: 'next' // 'next' or 'best'
         };
 
-        localStorage.setItem('dartsGameSettings', JSON.stringify(gameSettings));
+        storage.setItem('gameSettings', JSON.stringify(gameSettings));
         navigateToGame();
     });
 

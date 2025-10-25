@@ -18,6 +18,16 @@ function navigateToSetup() {
     window.location.href = path;
 }
 
+// Project identifier for localStorage to avoid conflicts with other projects on same domain
+const PROJECT_PREFIX = 'dartsScorer_';
+
+// Helper functions for localStorage with project prefix
+const storage = {
+    getItem: (key) => localStorage.getItem(PROJECT_PREFIX + key),
+    setItem: (key, value) => localStorage.setItem(PROJECT_PREFIX + key, value),
+    removeItem: (key) => localStorage.removeItem(PROJECT_PREFIX + key)
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const get = (id) => document.getElementById(id);
@@ -46,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let previousState = null; // For undo functionality across players
     let CHECKOUTS = {}; // Checkout data loaded from JSON
     let scoreInputBuffer = ''; // Buffer for score input mode
+    let previousScoreInputBuffer = ''; // Buffer for undo in score input mode
 
     // --- Initial Load ---
     const initializeGame = async () => {
@@ -76,39 +87,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     async function init() {
-        const settings = JSON.parse(localStorage.getItem('dartsGameSettings'));
+        const settings = JSON.parse(storage.getItem('gameSettings'));
         if (!settings) {
             navigateToSetup();
             return;
         }
 
-        const savedState = JSON.parse(localStorage.getItem('dartsGameState'));
+        const savedState = JSON.parse(storage.getItem('gameState'));
 
         if (savedState) {
-            const confirmText = window.getTranslation
-                ? window.getTranslation('confirm_resume_game')
-                : 'Möchten Sie das letzte Spiel fortsetzen?';
+            // Only show resume dialog if there's actual game progress
+            // (at least one player has thrown darts)
+            const hasGameProgress = savedState.players && savedState.players.some(p =>
+                p.history && p.history.length > 0
+            );
 
-            let result;
+            if (hasGameProgress) {
+                const confirmText = window.getTranslation
+                    ? window.getTranslation('confirm_resume_game')
+                    : 'Möchten Sie das letzte Spiel fortsetzen?';
 
-            // Use customConfirm if available, otherwise fallback to native confirm
-            if (typeof window.customConfirm === 'function') {
-                try {
-                    result = await window.customConfirm(confirmText);
-                } catch (error) {
-                    console.error('Custom confirm error:', error);
+                let result;
+
+                // Use customConfirm if available, otherwise fallback to native confirm
+                if (typeof window.customConfirm === 'function') {
+                    try {
+                        result = await window.customConfirm(confirmText);
+                    } catch (error) {
+                        console.error('Custom confirm error:', error);
+                        result = confirm(confirmText);
+                    }
+                } else {
                     result = confirm(confirmText);
                 }
-            } else {
-                result = confirm(confirmText);
-            }
 
-            if (result) {
-                state = savedState;
-                state.showError = false;
+                if (result) {
+                    state = savedState;
+                    state.showError = false;
+                } else {
+                    // User clicked No - delete saved game
+                    storage.removeItem('gameState');
+                    initNewGame(settings);
+                }
             } else {
-                // User clicked No - delete saved game
-                localStorage.removeItem('dartsGameState');
+                // No actual game progress, just start new game and clean up old state
+                storage.removeItem('gameState');
                 initNewGame(settings);
             }
         } else {
@@ -126,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
             doubleIn: settings.doubleIn,
             doubleOut: settings.doubleOut,
             nextPlayerMode: settings.nextPlayerMode || 'next',
-            inputMode: settings.inputMode || localStorage.getItem('dartsInputMode') || 'field',
+            inputMode: settings.inputMode || storage.getItem('inputMode') || 'field',
             players: settings.players.map(name => createPlayer(name, parseInt(settings.points, 10))),
             currentPlayerIndex: 0,
             legStarterIndex: 0,
@@ -179,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         newGameModalBtn.addEventListener('click', resetGame);
         nextPlayerModeSelect.addEventListener('change', (e) => {
             state.nextPlayerMode = e.target.value;
-            saveState();
+            updateSettings();
             render();
         });
 
@@ -208,20 +231,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         doubleInCheck.addEventListener('change', (e) => {
             state.doubleIn = e.target.checked;
-            saveState();
+            // Update settings in localStorage
+            updateSettings();
             render();
         });
         doubleOutCheck.addEventListener('change', (e) => {
             state.doubleOut = e.target.checked;
-            saveState();
+            // Update settings in localStorage
+            updateSettings();
             render();
         });
         inputModeSelect.addEventListener('change', (e) => {
             state.inputMode = e.target.value;
-            localStorage.setItem('dartsInputMode', e.target.value);
+            storage.setItem('inputMode', e.target.value);
             scoreInputBuffer = ''; // Clear buffer when switching modes
             state.currentTurn = []; // Clear current turn when switching modes
-            saveState();
+            // Update settings in localStorage
+            updateSettings();
             renderKeypad();
             render();
         });
@@ -297,8 +323,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (previousState !== null) {
                 // Restore previous player's turn
                 state = JSON.parse(JSON.stringify(previousState));
+                scoreInputBuffer = previousScoreInputBuffer;
                 previousState = null;
-                scoreInputBuffer = '';
+                previousScoreInputBuffer = '';
                 saveState();
                 renderKeypad();
                 render();
@@ -355,6 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Save state before modification to allow undo
         previousState = JSON.parse(JSON.stringify(state));
+        previousScoreInputBuffer = state.inputMode === 'score' ? String(state.currentTurn[0].score) : '';
         const player = state.players[state.currentPlayerIndex];
         let turnTotal = 0;
         let turnHasDoubled = false;
@@ -440,13 +468,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetGame() {
-        localStorage.removeItem('dartsGameState');
-        localStorage.removeItem('dartsGameSettings');
+        storage.removeItem('gameState');
+
+        // Keep current settings (double in/out, input mode, language)
+        // but reset to allow new player setup
+        const currentSettings = JSON.parse(storage.getItem('gameSettings'));
+        if (currentSettings) {
+            // Keep settings but clear players to force new setup
+            const preservedSettings = {
+                points: currentSettings.points,
+                players: [], // Clear players to show setup screen
+                doubleIn: state.doubleIn, // Use current game state
+                doubleOut: state.doubleOut,
+                inputMode: state.inputMode,
+                nextPlayerMode: state.nextPlayerMode || 'next'
+            };
+            storage.setItem('gameSettings', JSON.stringify(preservedSettings));
+        }
+
         navigateToSetup();
     }
 
+    function updateSettings() {
+        // Update only the settings in localStorage, not the game state
+        const currentSettings = JSON.parse(storage.getItem('gameSettings'));
+        if (currentSettings) {
+            currentSettings.doubleIn = state.doubleIn;
+            currentSettings.doubleOut = state.doubleOut;
+            currentSettings.inputMode = state.inputMode;
+            currentSettings.nextPlayerMode = state.nextPlayerMode;
+            storage.setItem('gameSettings', JSON.stringify(currentSettings));
+        }
+    }
+
     function saveState() {
-        localStorage.setItem('dartsGameState', JSON.stringify(state));
+        storage.setItem('gameState', JSON.stringify(state));
     }
 
     function getCheckoutSuggestion(score, dartsRemaining) {
@@ -591,26 +647,35 @@ document.addEventListener('DOMContentLoaded', () => {
             let currentScore = player.score;
             let dartsRemaining = 3;
 
-            if (isActive && state.currentTurn.length > 0) {
-                // Calculate score after current darts
-                let turnTotal = 0;
-                let turnHasDoubled = false;
+            if (isActive) {
+                // For score input mode, use the buffer
+                if (state.inputMode === 'score' && scoreInputBuffer) {
+                    const inputScore = parseInt(scoreInputBuffer, 10);
+                    if (!isNaN(inputScore)) {
+                        currentScore = player.score - inputScore;
+                        dartsRemaining = 0; // All darts used in score mode
+                    }
+                } else if (state.currentTurn.length > 0) {
+                    // For field input mode, calculate score after current darts
+                    let turnTotal = 0;
+                    let turnHasDoubled = false;
 
-                for (const dart of state.currentTurn) {
-                    if (state.doubleIn && !player.hasDoubledIn) {
-                        if (!turnHasDoubled && dart.multiplier === 2) {
-                            turnHasDoubled = true;
-                        }
-                        if (turnHasDoubled) {
+                    for (const dart of state.currentTurn) {
+                        if (state.doubleIn && !player.hasDoubledIn) {
+                            if (!turnHasDoubled && dart.multiplier === 2) {
+                                turnHasDoubled = true;
+                            }
+                            if (turnHasDoubled) {
+                                turnTotal += dart.score;
+                            }
+                        } else {
                             turnTotal += dart.score;
                         }
-                    } else {
-                        turnTotal += dart.score;
                     }
-                }
 
-                currentScore = player.score - turnTotal;
-                dartsRemaining = 3 - state.currentTurn.length;
+                    currentScore = player.score - turnTotal;
+                    dartsRemaining = 3 - state.currentTurn.length;
+                }
             }
 
             const checkout = getCheckoutSuggestion(currentScore, dartsRemaining);
@@ -644,7 +709,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Always show current score for active player, include checkout in same line
             let scoreDisplay;
             if (isActive) {
-                if (state.currentTurn.length > 0 && currentScore !== player.score) {
+                // Check if there's input (either darts in field mode or buffer in score mode)
+                const hasInput = (state.inputMode === 'score' && scoreInputBuffer) || state.currentTurn.length > 0;
+
+                if (hasInput && currentScore !== player.score) {
                     // Show current score with checkout
                     scoreDisplay = `<div class="text-2xl font-bold text-blue-300 text-center" style="line-height: 1.2;">→ ${currentScore} <span class="text-lg text-yellow-400">${specialText}</span></div>`;
                 } else {
@@ -690,7 +758,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // In score mode, show the input buffer
         if (state.inputMode === 'score') {
             if (scoreInputBuffer) {
-                // Show only the number on the right, no text on the left
+                // Show current input on the right
                 turnTotalEl.textContent = scoreInputBuffer;
                 turnTotalEl.classList.remove('text-gray-500', 'text-red-400');
             } else {
