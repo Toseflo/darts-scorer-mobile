@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Darts Scorer - Spiel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        /* noinspection CssUnusedSymbol */
+        .player-active {
+            box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.6);
+            border-color: #3B82F6;
+        }
+        .keypad-btn:active {
+            transform: scale(0.95);
+            background-color: #374151;
+        }
+        /* noinspection CssUnusedSymbol */
+        .keypad, .player-panel, .current-turn-display {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen overscroll-contain" data-i18n-title="title_game">
+
+    <div id="app" class="max-w-lg mx-auto p-3 pb-8">
+        <div id="gameScreen">
+            <!-- Scoreboard -->
+            <div id="scoreboard" class="flex justify-between space-x-2 mb-3 cursor-pointer" title="Klicken um alle Spieler anzuzeigen">
+                <!-- Player Panels will be injected here -->
+            </div>
+
+            <!-- Stats Display -->
+            <div id="stats-display" class="flex justify-between space-x-2 mb-3 text-xs text-gray-400">
+                <!-- Stats will be injected here -->
+            </div>
+
+            <!-- Current Turn Display -->
+            <div class="current-turn-display bg-gray-800 p-3 rounded-lg mb-3 h-20 flex items-center justify-between">
+                <div id="dart-entries" class="flex space-x-2"></div>
+                <div id="turn-total" class="text-4xl font-bold text-gray-500">0</div>
+            </div>
+
+            <!-- Input Keypad -->
+            <div class="keypad space-y-2">
+                <div class="grid grid-cols-2 gap-2">
+                    <button data-multiplier="3" class="multiplier-btn keypad-btn bg-gray-700 text-blue-300 text-xl font-bold py-4 rounded-lg" data-i18n="tripple">TRIPLE</button>
+                    <button data-multiplier="2" class="multiplier-btn keypad-btn bg-gray-700 text-green-300 text-xl font-bold py-4 rounded-lg" data-i18n="double">DOPPEL</button>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                    <button data-number="20" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">20</button>
+                    <button data-number="19" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">19</button>
+                    <button data-number="18" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">18</button>
+                    <button data-number="17" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">17</button>
+                    <button data-number="16" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">16</button>
+                    <button data-number="15" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">15</button>
+                    <button data-number="14" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">14</button>
+                    <button data-number="13" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">13</button>
+                    <button data-number="12" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">12</button>
+                    <button data-number="11" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">11</button>
+                    <button data-number="10" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">10</button>
+                    <button data-number="9" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">9</button>
+                    <button data-number="8" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">8</button>
+                    <button data-number="7" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">7</button>
+                    <button data-number="6" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">6</button>
+                    <button data-number="5" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">5</button>
+                    <button data-number="4" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">4</button>
+                    <button data-number="3" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">3</button>
+                    <button data-number="2" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">2</button>
+                    <button data-number="1" class="keypad-btn bg-gray-600 text-2xl font-bold py-4 rounded-lg">1</button>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                    <button data-number="25" class="keypad-btn bg-gray-600 text-xl font-bold py-4 rounded-lg" data-i18n="bull">BULL</button>
+                    <button data-number="0" class="keypad-btn bg-gray-600 text-xl font-bold py-4 rounded-lg" data-i18n="miss">MISS</button>
+                    <button data-action="undo" class="keypad-btn bg-yellow-600 text-xl font-bold py-4 rounded-lg" data-i18n="undo">ZURÜCK</button>
+                    <button data-action="next" class="keypad-btn bg-green-600 text-xl font-bold py-4 rounded-lg" data-i18n="done">FERTIG</button>
+                </div>
+                <div class="pt-4">
+                    <button id="reset-game-btn" class="w-full bg-red-700 hover:bg-red-800 text-white font-medium py-2 px-4 rounded-lg text-sm" data-i18n="new_game_setup">Neues Spiel (Setup)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- All Players Modal -->
+        <div id="all-players-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-sm shadow-2xl max-h-[80vh] flex flex-col">
+                <h2 class="text-2xl font-bold text-center text-blue-400 mb-4" data-i18n="all_players">Alle Spieler</h2>
+                <ul id="all-players-list" class="space-y-2 overflow-y-auto mb-4"></ul>
+                <div id="next-player-display-settings" class="hidden my-4 text-sm">
+                    <label class="flex items-center">
+                        <span class="mr-2 text-gray-300" data-i18n="show_next_player">Nächsten Spieler anzeigen:</span>
+                        <select id="next-player-mode-select" class="bg-gray-700 border-gray-600 rounded-md py-1 px-2">
+                            <option value="next" data-i18n="next_in_line">Nächster in Reihe</option>
+                            <option value="best" data-i18n="best_player">Bester Spieler</option>
+                        </select>
+                    </label>
+                </div>
+                <button id="close-all-players-modal-btn" class="w-full mt-auto bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg" data-i18n="close">Schließen</button>
+            </div>
+        </div>
+
+        <!-- Game Over Modal -->
+        <div id="game-over-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-sm text-center shadow-2xl">
+                <h2 id="winner-name" class="text-3xl font-bold text-yellow-400 mb-4"></h2>
+                <p id="game-over-text" class="text-lg mb-6" data-i18n="game_over_won">hat das Leg gewonnen!</p>
+                <div class="space-y-3">
+                    <button id="next-leg-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg" data-i18n="next_leg">Nächstes Leg</button>
+                    <button id="new-game-modal-btn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg" data-i18n="new_game_complete">Komplett neues Spiel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/localization.js"></script>
+    <script src="assets/js/game.js"></script>
+</body>
+</html>
+
