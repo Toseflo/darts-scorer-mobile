@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function init() {
         const settings = JSON.parse(localStorage.getItem('dartsGameSettings'));
         if (!settings) {
-            window.location.href = './';
+            window.location.href = 'index.html';
             return;
         }
 
@@ -306,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetGame() {
         localStorage.removeItem('dartsGameState');
         localStorage.removeItem('dartsGameSettings');
-        window.location.href = './';
+        window.location.href = 'index.html';
     }
 
     function saveState() {
