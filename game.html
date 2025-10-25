@@ -54,7 +54,7 @@
             <!-- Current Turn Display -->
             <div class="current-turn-display bg-gray-800 p-2 rounded-lg mb-2 h-16 flex items-center justify-between">
                 <div id="dart-entries" class="flex space-x-2"></div>
-                <div id="turn-total" class="text-3xl font-bold text-gray-500">0</div>
+                <div id="turn-total" class="text-3xl font-bold text-gray-500 pr-4">0</div>
             </div>
 
             <!-- Input Keypad -->
@@ -91,8 +91,63 @@
                     <button data-action="undo" class="keypad-btn bg-yellow-600 text-lg font-bold py-3 rounded-lg" data-i18n="undo">ZURÜCK</button>
                     <button data-action="next" class="keypad-btn bg-green-600 text-lg font-bold py-3 rounded-lg" data-i18n="done">FERTIG</button>
                 </div>
-                <div class="pt-2">
-                    <button id="reset-game-btn" class="w-full bg-red-700 hover:bg-red-800 text-white font-medium py-1.5 px-4 rounded-lg text-sm" data-i18n="new_game_setup">Neues Spiel (Setup)</button>
+                <div class="pt-2 grid grid-cols-2 gap-1.5">
+                    <button id="settings-game-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-1.5 px-4 rounded-lg text-sm flex items-center justify-center" title="Einstellungen">
+                        <svg class="h-4 w-4 mr-1" viewBox="0 0 24 24" stroke="currentColor" style="fill: none;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span data-i18n="settings">Einstellungen</span>
+                    </button>
+                    <button id="reset-game-btn" class="bg-red-700 hover:bg-red-800 text-white font-medium py-1.5 px-4 rounded-lg text-sm" data-i18n="new_game_setup">Neues Spiel (Setup)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-sm text-center shadow-2xl">
+                <h2 class="text-2xl font-bold text-blue-400 mb-6" data-i18n="settings">Einstellungen</h2>
+                <div class="space-y-4 text-left">
+                    <div class="relative flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="double-in-check" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="double-in-check" class="font-medium text-gray-300" data-i18n="double_in">Double In</label>
+                            <p class="text-gray-400" data-i18n="double_in_desc">Das Spiel muss mit einem Doppel begonnen werden.</p>
+                        </div>
+                    </div>
+                    <div class="relative flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="double-out-check" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="double-out-check" class="font-medium text-gray-300" data-i18n="double_out">Double Out</label>
+                            <p class="text-gray-400" data-i18n="double_out_desc">Das Spiel muss mit einem Doppel beendet werden.</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-700 my-4"></div>
+                    <div>
+                        <label for="language-select-game" class="block text-sm font-medium text-gray-300" data-i18n="language">Sprache</label>
+                        <select id="language-select-game" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <!-- Languages will be dynamically loaded -->
+                        </select>
+                    </div>
+                </div>
+                <button id="close-modal-btn" class="mt-6 w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg shadow transition duration-200" data-i18n="close">
+                    Schließen
+                </button>
+            </div>
+        </div>
+
+        <!-- Custom Confirm Dialog -->
+        <div id="confirm-dialog" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-sm text-center shadow-2xl">
+                <p id="confirm-message" class="text-lg mb-6 text-gray-200"></p>
+                <div class="flex space-x-3">
+                    <button id="confirm-no-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg" data-i18n="no">Nein</button>
+                    <button id="confirm-yes-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg" data-i18n="yes">Ja</button>
                 </div>
             </div>
         </div>

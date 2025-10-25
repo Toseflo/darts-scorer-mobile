@@ -68,7 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
             .filter(name => name);
 
         if (players.length === 0) {
-            alert('Bitte fügen Sie mindestens einen Spieler hinzu.');
+            const alertText = window.getTranslation
+                ? window.getTranslation('alert_min_one_player')
+                : 'Bitte fügen Sie mindestens einen Spieler hinzu.';
+            alert(alertText);
             return;
         }
 

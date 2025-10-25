@@ -14,9 +14,9 @@
     "double_out_desc": "The game must be finished with a double.",
     "close": "Close",
     "player_placeholder": "Player",
-    "alert_min_one_player": "Please add at least one player.",
     "confirm_resume_game": "Do you want to resume the last game?",
     "confirm_reset_game": "Are you sure you want to reset the game and return to setup?",
+    "alert_min_one_player": "Please add at least one player.",
     "all_players": "All Players",
     "show_next_player": "Show next player:",
     "next_in_line": "Next in line",
@@ -37,6 +37,8 @@
     "double_in_needed": "Double In required",
     "double_in_required": "Double In required",
     "language": "Language",
-    "error_no_darts": "Please enter at least one dart (or MISS)!"
+    "error_no_darts": "Please enter at least one dart (or MISS)!",
+    "yes": "Yes",
+    "no": "No"
 }
 

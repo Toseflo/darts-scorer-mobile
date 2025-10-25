@@ -6,6 +6,54 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Add the language code to the array below
     const availableLanguages = ['de', 'en']; // List of available language files
 
+    // Custom confirm dialog function - Make available immediately
+    window.customConfirm = (message) => {
+        return new Promise((resolve) => {
+            const dialog = document.getElementById('confirm-dialog');
+            const messageEl = document.getElementById('confirm-message');
+            const yesBtn = document.getElementById('confirm-yes-btn');
+            const noBtn = document.getElementById('confirm-no-btn');
+
+            if (!dialog || !messageEl || !yesBtn || !noBtn) {
+                console.warn('Custom confirm elements not found, using native confirm');
+                resolve(confirm(message));
+                return;
+            }
+
+            messageEl.textContent = message;
+            dialog.classList.remove('hidden');
+
+            const handleYes = () => {
+                cleanup();
+                resolve(true);
+            };
+
+            const handleNo = () => {
+                cleanup();
+                resolve(false);
+            };
+
+            const handleEscape = (e) => {
+                if (e.key === 'Escape') {
+                    cleanup();
+                    resolve(false);
+                }
+            };
+
+            const cleanup = () => {
+                dialog.classList.add('hidden');
+                yesBtn.removeEventListener('click', handleYes);
+                noBtn.removeEventListener('click', handleNo);
+                document.removeEventListener('keydown', handleEscape);
+            };
+
+            yesBtn.addEventListener('click', handleYes);
+            noBtn.addEventListener('click', handleNo);
+            document.addEventListener('keydown', handleEscape);
+        });
+    };
+
+
     const loadAvailableLanguages = async () => {
         const languageOptions = [];
 
@@ -35,19 +83,31 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const populateLanguageSelect = (languages, selectedLang) => {
+        // Populate main language select (index.html)
         const langSelect = document.getElementById('language-select');
-        if (!langSelect) return;
+        if (langSelect) {
+            langSelect.innerHTML = '';
+            languages.forEach(lang => {
+                const option = document.createElement('option');
+                option.value = lang.code;
+                option.textContent = lang.name;
+                langSelect.appendChild(option);
+            });
+            langSelect.value = selectedLang;
+        }
 
-        langSelect.innerHTML = '';
-
-        languages.forEach(lang => {
-            const option = document.createElement('option');
-            option.value = lang.code;
-            option.textContent = lang.name;
-            langSelect.appendChild(option);
-        });
-
-        langSelect.value = selectedLang;
+        // Populate game language select (game.html)
+        const langSelectGame = document.getElementById('language-select-game');
+        if (langSelectGame) {
+            langSelectGame.innerHTML = '';
+            languages.forEach(lang => {
+                const option = document.createElement('option');
+                option.value = lang.code;
+                option.textContent = lang.name;
+                langSelectGame.appendChild(option);
+            });
+            langSelectGame.value = selectedLang;
+        }
     };
 
     const loadTranslations = async (lang) => {
@@ -98,14 +158,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         translatePage(lang);
         localStorage.setItem('dartsScorerLanguage', lang);
+
+        // Update both language selects
         const langSelect = document.getElementById('language-select');
         if (langSelect) langSelect.value = lang;
+
+        const langSelectGame = document.getElementById('language-select-game');
+        if (langSelectGame) langSelectGame.value = lang;
     };
 
     const getTranslation = (key) => {
         const lang = localStorage.getItem('dartsScorerLanguage') || 'en';
         return (translations[lang] && translations[lang][key]) || key;
     };
+
 
     const getInitialLanguage = () => {
         return localStorage.getItem('dartsScorerLanguage') || navigator.language.split('-')[0] || 'en';
@@ -129,9 +195,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        const langSelectGame = document.getElementById('language-select-game');
+        if (langSelectGame) {
+            langSelectGame.addEventListener('change', (e) => {
+                setLanguage(e.target.value);
+            });
+        }
+
         // Make setLanguage globally available
         window.setLanguage = setLanguage;
         window.getTranslation = getTranslation;
+        // customConfirm is already set globally at the top
 
         // Set initial language
         await setLanguage(selectedLang);

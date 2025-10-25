@@ -14,9 +14,9 @@
     "double_out_desc": "Das Spiel muss mit einem Doppel beendet werden.",
     "close": "Schließen",
     "player_placeholder": "Spieler",
-    "alert_min_one_player": "Bitte fügen Sie mindestens einen Spieler hinzu.",
     "confirm_resume_game": "Möchten Sie das letzte Spiel fortsetzen?",
     "confirm_reset_game": "Möchten Sie das Spiel wirklich zurücksetzen und zum Setup zurückkehren?",
+    "alert_min_one_player": "Bitte fügen Sie mindestens einen Spieler hinzu.",
     "all_players": "Alle Spieler",
     "show_next_player": "Nächsten Spieler anzeigen:",
     "next_in_line": "Nächster in Reihe",
@@ -37,6 +37,8 @@
     "double_in_needed": "Double In benötigt",
     "double_in_required": "Double In benötigt",
     "language": "Sprache",
-    "error_no_darts": "Bitte mindestens einen Dart eingeben (oder MISS)!"
+    "error_no_darts": "Bitte mindestens einen Dart eingeben (oder MISS)!",
+    "yes": "Ja",
+    "no": "Nein"
 }
 

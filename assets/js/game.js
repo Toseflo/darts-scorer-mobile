@@ -16,6 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetGameBtn = get('reset-game-btn');
     const nextPlayerDisplaySettings = get('next-player-display-settings');
     const nextPlayerModeSelect = get('next-player-mode-select');
+    const settingsModal = get('settings-modal');
+    const settingsGameBtn = get('settings-game-btn');
+    const closeSettingsBtn = get('close-modal-btn');
+    const doubleInCheck = get('double-in-check');
+    const doubleOutCheck = get('double-out-check');
+    const languageSelectGame = get('language-select-game');
 
     // --- Game State ---
     let state = {};
@@ -27,16 +33,20 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => {
             CHECKOUTS = data;
-            init(); // Start the game logic after checkouts are loaded
+            init().catch(error => {
+                console.error('Failed to initialize game:', error);
+            });
         })
         .catch(error => {
             console.error("Could not load checkout data:", error);
             // Optionally, initialize without checkouts
-            init();
+            init().catch(error => {
+                console.error('Failed to initialize game:', error);
+            });
         });
 
 
-    function init() {
+    async function init() {
         const settings = JSON.parse(localStorage.getItem('dartsGameSettings'));
         if (!settings) {
             window.location.href = 'index.html';
@@ -45,25 +55,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const savedState = JSON.parse(localStorage.getItem('dartsGameState'));
 
-        if (savedState && confirm('Möchten Sie das letzte Spiel fortsetzen?')) {
-            state = savedState;
-            state.showError = false; // Reset error flag on load
+        if (savedState) {
+            const confirmText = window.getTranslation
+                ? window.getTranslation('confirm_resume_game')
+                : 'Möchten Sie das letzte Spiel fortsetzen?';
+
+            let result;
+
+            // Use customConfirm if available, otherwise fallback to native confirm
+            if (typeof window.customConfirm === 'function') {
+                try {
+                    result = await window.customConfirm(confirmText);
+                } catch (error) {
+                    console.error('Custom confirm error:', error);
+                    result = confirm(confirmText);
+                }
+            } else {
+                result = confirm(confirmText);
+            }
+
+            if (result) {
+                state = savedState;
+                state.showError = false;
+            } else {
+                initNewGame(settings);
+            }
         } else {
-            state = {
-                gameType: parseInt(settings.points, 10),
-                doubleIn: settings.doubleIn,
-                doubleOut: settings.doubleOut,
-                nextPlayerMode: settings.nextPlayerMode || 'next',
-                players: settings.players.map(name => createPlayer(name, parseInt(settings.points, 10))),
-                currentPlayerIndex: 0,
-                legStarterIndex: 0,
-                currentTurn: [],
-                showError: false,
-            };
+            initNewGame(settings);
         }
 
         addEventListeners();
         render();
+    }
+
+    function initNewGame(settings) {
+        state = {
+            gameType: parseInt(settings.points, 10),
+            doubleIn: settings.doubleIn,
+            doubleOut: settings.doubleOut,
+            nextPlayerMode: settings.nextPlayerMode || 'next',
+            players: settings.players.map(name => createPlayer(name, parseInt(settings.points, 10))),
+            currentPlayerIndex: 0,
+            legStarterIndex: 0,
+            currentTurn: [],
+            showError: false,
+        };
     }
 
     function createPlayer(name, score) {
@@ -87,14 +123,48 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         resetGameBtn.addEventListener('click', () => {
-            if (confirm('Möchten Sie das Spiel wirklich zurücksetzen und zum Setup zurückkehren?')) {
-                resetGame();
+            const confirmText = window.getTranslation
+                ? window.getTranslation('confirm_reset_game')
+                : 'Möchten Sie das Spiel wirklich zurücksetzen und zum Setup zurückkehren?';
+
+            if (window.customConfirm) {
+                window.customConfirm(confirmText).then(result => {
+                    if (result) {
+                        resetGame();
+                    }
+                }).catch(error => {
+                    console.error('Confirm error:', error);
+                });
+            } else {
+                // Fallback to native confirm
+                if (confirm(confirmText)) {
+                    resetGame();
+                }
             }
         });
         nextLegBtn.addEventListener('click', startNextLeg);
         newGameModalBtn.addEventListener('click', resetGame);
         nextPlayerModeSelect.addEventListener('change', (e) => {
             state.nextPlayerMode = e.target.value;
+            saveState();
+            render();
+        });
+
+        // Settings modal event listeners
+        settingsGameBtn.addEventListener('click', showSettingsModal);
+        closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                settingsModal.classList.add('hidden');
+            }
+        });
+        doubleInCheck.addEventListener('change', (e) => {
+            state.doubleIn = e.target.checked;
+            saveState();
+            render();
+        });
+        doubleOutCheck.addEventListener('change', (e) => {
+            state.doubleOut = e.target.checked;
             saveState();
             render();
         });
@@ -462,6 +532,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         allPlayersModal.classList.remove('hidden');
+    }
+
+    function showSettingsModal() {
+        // Update checkbox states from current game state
+        doubleInCheck.checked = state.doubleIn;
+        doubleOutCheck.checked = state.doubleOut;
+
+        // Set current language in dropdown (already populated by localization.js)
+        const currentLang = localStorage.getItem('dartsScorerLanguage') || 'de';
+        if (languageSelectGame) {
+            languageSelectGame.value = currentLang;
+        }
+
+        settingsModal.classList.remove('hidden');
     }
 
     // --- App Start ---
