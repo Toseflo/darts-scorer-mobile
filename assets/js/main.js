@@ -16,8 +16,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const addPlayerBtn = document.getElementById('add-player');
     const startGameBtn = document.getElementById('start-game');
     const settingsBtn = document.getElementById('settings-btn');
-    const closeModalBtn = document.getElementById('close-modal-btn');
-    const settingsModal = document.getElementById('settings-modal');
+
+    let settingsModal = document.getElementById('settings-modal');
+    let closeModalBtn = document.getElementById('close-modal-btn');
+
+    // Initialize settings modal elements
+    const initSettingsModal = () => {
+        settingsModal = document.getElementById('settings-modal');
+        closeModalBtn = document.getElementById('close-modal-btn');
+
+        if (settingsModal && closeModalBtn) {
+            // Set default values
+            const doubleOutCheck = document.getElementById('double-out-check');
+            if (doubleOutCheck && !doubleOutCheck.hasAttribute('data-initialized')) {
+                doubleOutCheck.checked = true;
+                doubleOutCheck.setAttribute('data-initialized', 'true');
+            }
+
+            closeModalBtn.addEventListener('click', () => {
+                settingsModal.classList.add('hidden');
+            });
+
+            window.addEventListener('click', (event) => {
+                if (event.target === settingsModal) {
+                    settingsModal.classList.add('hidden');
+                }
+            });
+        }
+    };
+
+    // Initialize modal (should be loaded synchronously by now)
+    initSettingsModal();
 
     const createPlayerInput = (playerNumber) => {
         const playerDiv = document.createElement('div');
@@ -62,16 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     settingsBtn.addEventListener('click', () => {
-        settingsModal.classList.remove('hidden');
-    });
-
-    closeModalBtn.addEventListener('click', () => {
-        settingsModal.classList.add('hidden');
-    });
-
-    window.addEventListener('click', (event) => {
-        if (event.target === settingsModal) {
-            settingsModal.classList.add('hidden');
+        if (settingsModal) {
+            settingsModal.classList.remove('hidden');
         }
     });
 
@@ -88,11 +109,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const doubleInCheck = document.getElementById('double-in-check');
+        const doubleOutCheck = document.getElementById('double-out-check');
+        const inputModeSelect = document.getElementById('input-mode-select');
+
         const gameSettings = {
             points: document.getElementById('game-points').value,
             players: players,
-            doubleIn: document.getElementById('double-in-check').checked,
-            doubleOut: document.getElementById('double-out-check').checked,
+            doubleIn: doubleInCheck ? doubleInCheck.checked : false,
+            doubleOut: doubleOutCheck ? doubleOutCheck.checked : true,
+            inputMode: inputModeSelect ? inputModeSelect.value : 'field',
             nextPlayerMode: 'next' // 'next' or 'best'
         };
 

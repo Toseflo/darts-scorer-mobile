@@ -39,6 +39,10 @@
     "language": "Language",
     "error_no_darts": "Please enter at least one dart (or MISS)!",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "input_mode": "Input Mode",
+    "input_mode_field": "Field Input",
+    "input_mode_score": "Score Input",
+    "input_mode_desc": "Choose how you want to enter your throws."
 }
 

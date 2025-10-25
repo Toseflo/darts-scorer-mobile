@@ -98,19 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             langSelect.value = selectedLang;
         }
-
-        // Populate game language select (game.html)
-        const langSelectGame = document.getElementById('language-select-game');
-        if (langSelectGame) {
-            langSelectGame.innerHTML = '';
-            languages.forEach(lang => {
-                const option = document.createElement('option');
-                option.value = lang.code;
-                option.textContent = lang.name;
-                langSelectGame.appendChild(option);
-            });
-            langSelectGame.value = selectedLang;
-        }
     };
 
     const loadTranslations = async (lang) => {
@@ -198,13 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        const langSelectGame = document.getElementById('language-select-game');
-        if (langSelectGame) {
-            langSelectGame.addEventListener('change', (e) => {
-                setLanguage(e.target.value);
-            });
-        }
-
         // Make setLanguage globally available
         window.setLanguage = setLanguage;
         window.getTranslation = getTranslation;
@@ -214,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await setLanguage(selectedLang);
     };
 
+    // Initialize (settings modal should be loaded synchronously by now)
     init().catch(error => {
         console.error('Failed to initialize localization:', error);
     });

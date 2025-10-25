@@ -39,6 +39,10 @@
     "language": "Sprache",
     "error_no_darts": "Bitte mindestens einen Dart eingeben (oder MISS)!",
     "yes": "Ja",
-    "no": "Nein"
+    "no": "Nein",
+    "input_mode": "Eingabemodus",
+    "input_mode_field": "Feld-Eingabe",
+    "input_mode_score": "Punktzahl-Eingabe",
+    "input_mode_desc": "Wählen Sie, wie Sie Ihre Würfe eingeben möchten."
 }
 

@@ -36,17 +36,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetGameBtn = get('reset-game-btn');
     const nextPlayerDisplaySettings = get('next-player-display-settings');
     const nextPlayerModeSelect = get('next-player-mode-select');
-    const settingsModal = get('settings-modal');
     const settingsGameBtn = get('settings-game-btn');
-    const closeSettingsBtn = get('close-modal-btn');
-    const doubleInCheck = get('double-in-check');
-    const doubleOutCheck = get('double-out-check');
-    const languageSelectGame = get('language-select-game');
+
+    // Settings modal elements - will be initialized after modal is loaded
+    let settingsModal, closeSettingsBtn, doubleInCheck, doubleOutCheck, languageSelect, inputModeSelect;
 
     // --- Game State ---
     let state = {};
     let previousState = null; // For undo functionality across players
     let CHECKOUTS = {}; // Checkout data loaded from JSON
+    let scoreInputBuffer = ''; // Buffer for score input mode
 
     // --- Initial Load ---
     fetch('../assets/data/checkouts.json')
@@ -98,6 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 state = savedState;
                 state.showError = false;
             } else {
+                // User clicked No - delete saved game
+                localStorage.removeItem('dartsGameState');
                 initNewGame(settings);
             }
         } else {
@@ -105,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         addEventListeners();
+        renderKeypad();
         render();
     }
 
@@ -114,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
             doubleIn: settings.doubleIn,
             doubleOut: settings.doubleOut,
             nextPlayerMode: settings.nextPlayerMode || 'next',
+            inputMode: settings.inputMode || localStorage.getItem('dartsInputMode') || 'field',
             players: settings.players.map(name => createPlayer(name, parseInt(settings.points, 10))),
             currentPlayerIndex: 0,
             legStarterIndex: 0,
@@ -170,8 +173,23 @@ document.addEventListener('DOMContentLoaded', () => {
             render();
         });
 
-        // Settings modal event listeners
         settingsGameBtn.addEventListener('click', showSettingsModal);
+    }
+
+    function initSettingsModalListeners() {
+        settingsModal = get('settings-modal');
+        closeSettingsBtn = get('close-modal-btn');
+        doubleInCheck = get('double-in-check');
+        doubleOutCheck = get('double-out-check');
+        languageSelect = get('language-select');
+        inputModeSelect = get('input-mode-select');
+
+        if (!settingsModal || !closeSettingsBtn || !doubleInCheck || !doubleOutCheck || !inputModeSelect) {
+            console.error('Settings modal elements not found');
+            return;
+        }
+
+        // Settings modal event listeners
         closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
         settingsModal.addEventListener('click', (e) => {
             if (e.target === settingsModal) {
@@ -188,7 +206,19 @@ document.addEventListener('DOMContentLoaded', () => {
             saveState();
             render();
         });
+        inputModeSelect.addEventListener('change', (e) => {
+            state.inputMode = e.target.value;
+            localStorage.setItem('dartsInputMode', e.target.value);
+            scoreInputBuffer = ''; // Clear buffer when switching modes
+            state.currentTurn = []; // Clear current turn when switching modes
+            saveState();
+            renderKeypad();
+            render();
+        });
     }
+
+    // Initialize settings modal (should be loaded synchronously by now)
+    initSettingsModalListeners();
 
     function handleKeypadClick(e) {
         const target = e.target.closest('button');
@@ -197,15 +227,37 @@ document.addEventListener('DOMContentLoaded', () => {
         const number = target.dataset.number;
         const multiplier = target.dataset.multiplier;
         const action = target.dataset.action;
+        const digit = target.dataset.digit;
 
-        if (number !== undefined) {
-            handleScoreInput(parseInt(number, 10));
-        } else if (multiplier !== undefined) {
-            applyMultiplier(parseInt(multiplier, 10));
-        } else if (action !== undefined) {
-            if (action === 'undo') handleUndo();
-            if (action === 'next') submitTurn();
+        if (state.inputMode === 'score') {
+            // Score input mode
+            if (digit !== undefined) {
+                handleDigitInput(digit);
+            } else if (action === 'clear') {
+                scoreInputBuffer = '';
+                render();
+            } else if (action === 'undo') {
+                handleUndo();
+            } else if (action === 'next') {
+                submitTurn();
+            }
+        } else {
+            // Field input mode
+            if (number !== undefined) {
+                handleScoreInput(parseInt(number, 10));
+            } else if (multiplier !== undefined) {
+                applyMultiplier(parseInt(multiplier, 10));
+            } else if (action !== undefined) {
+                if (action === 'undo') handleUndo();
+                if (action === 'next') submitTurn();
+            }
         }
+    }
+
+    function handleDigitInput(digit) {
+        // In score mode, we're entering the total score for the turn, not individual darts
+        scoreInputBuffer += digit;
+        render();
     }
 
     function handleScoreInput(value) {
@@ -226,6 +278,25 @@ document.addEventListener('DOMContentLoaded', () => {
         render();
     }
     function handleUndo() {
+        // In score mode, undo works differently
+        if (state.inputMode === 'score') {
+            if (scoreInputBuffer.length > 0) {
+                // Remove last digit from buffer
+                scoreInputBuffer = scoreInputBuffer.slice(0, -1);
+                render();
+            } else if (previousState !== null) {
+                // Restore previous player's turn
+                state = JSON.parse(JSON.stringify(previousState));
+                previousState = null;
+                scoreInputBuffer = '';
+                saveState();
+                renderKeypad();
+                render();
+            }
+            return;
+        }
+
+        // Field mode
         if (state.currentTurn.length > 0) {
             // Remove last dart from current turn
             state.currentTurn.pop();
@@ -240,6 +311,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function submitTurn() {
+        // In score mode, convert buffer to turn score
+        if (state.inputMode === 'score') {
+            if (scoreInputBuffer === '') {
+                // No score entered
+                state.showError = true;
+                render();
+                return;
+            }
+
+            const totalScore = parseInt(scoreInputBuffer, 10);
+            if (isNaN(totalScore) || totalScore < 0 || totalScore > 180) {
+                // Invalid score
+                scoreInputBuffer = '';
+                render();
+                return;
+            }
+
+            // Store total score as a single "turn" entry
+            state.currentTurn = [{ value: totalScore, multiplier: 1, score: totalScore }];
+            scoreInputBuffer = '';
+        }
+
         if (state.currentTurn.length === 0) {
             // Prevent submitting an empty turn and show error in current turn display
             state.showError = true;
@@ -257,6 +350,14 @@ document.addEventListener('DOMContentLoaded', () => {
         let turnHasDoubled = false;
 
         if (state.doubleIn && !player.hasDoubledIn) {
+            // In score mode, we can't track individual doubles, so skip this turn
+            if (state.inputMode === 'score') {
+                // Can't use score mode with double in requirement
+                state.currentTurn = [];
+                render();
+                return;
+            }
+
             for (const dart of state.currentTurn) {
                 if (!turnHasDoubled && dart.multiplier === 2) {
                     turnHasDoubled = true;
@@ -276,7 +377,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let isWinner = false;
 
         if (scoreAfterTurn === 0) {
-            if (!state.doubleOut || (lastDart && lastDart.multiplier === 2)) {
+            // In score mode, we can't verify double out
+            if (state.inputMode === 'score' && state.doubleOut) {
+                // Can't verify double out in score mode - assume valid
+                isWinner = true;
+            } else if (!state.doubleOut || (lastDart && lastDart.multiplier === 2)) {
                 isWinner = true;
             } else {
                 isBust = true;
@@ -288,7 +393,8 @@ document.addEventListener('DOMContentLoaded', () => {
             player.history.push(turnTotal);
         }
 
-        player.dartsThrown += state.currentTurn.length;
+        // In score mode, always count as 3 darts thrown
+        player.dartsThrown += state.inputMode === 'score' ? 3 : state.currentTurn.length;
 
         if (isWinner) {
             player.legs += 1;
@@ -359,6 +465,79 @@ document.addEventListener('DOMContentLoaded', () => {
     function render() {
         renderScoreboard();
         renderCurrentTurn();
+    }
+
+    function renderKeypad() {
+        const keypadGrid = document.getElementById('keypad-grid');
+
+        if (state.inputMode === 'score') {
+            // Score input mode: 0-9 buttons for total score entry
+            keypadGrid.className = 'space-y-1.5';
+            keypadGrid.innerHTML = `
+                <div class="grid grid-cols-3 gap-1.5">
+                    <button data-digit="7" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">7</button>
+                    <button data-digit="8" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">8</button>
+                    <button data-digit="9" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">9</button>
+                    <button data-digit="4" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">4</button>
+                    <button data-digit="5" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">5</button>
+                    <button data-digit="6" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">6</button>
+                    <button data-digit="1" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">1</button>
+                    <button data-digit="2" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">2</button>
+                    <button data-digit="3" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">3</button>
+                    <button data-digit="0" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg col-span-2">0</button>
+                    <button data-action="clear" class="keypad-btn bg-yellow-600 text-lg font-bold py-3 rounded-lg">C</button>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <button data-action="undo" class="keypad-btn bg-yellow-600 text-lg font-bold py-3 rounded-lg" data-i18n="undo">ZURÜCK</button>
+                    <button data-action="next" class="keypad-btn bg-green-600 text-lg font-bold py-3 rounded-lg" data-i18n="done">FERTIG</button>
+                </div>
+            `;
+        } else {
+            // Field input mode: original layout
+            keypadGrid.className = 'space-y-1.5';
+            keypadGrid.innerHTML = `
+                <div class="grid grid-cols-2 gap-1.5">
+                    <button data-multiplier="3" class="multiplier-btn keypad-btn bg-gray-700 text-blue-300 text-lg font-bold py-3 rounded-lg" data-i18n="tripple">TRIPLE</button>
+                    <button data-multiplier="2" class="multiplier-btn keypad-btn bg-gray-700 text-green-300 text-lg font-bold py-3 rounded-lg" data-i18n="double">DOPPEL</button>
+                </div>
+                <div class="grid grid-cols-4 gap-1.5">
+                    <button data-number="20" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">20</button>
+                    <button data-number="19" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">19</button>
+                    <button data-number="18" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">18</button>
+                    <button data-number="17" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">17</button>
+                    <button data-number="16" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">16</button>
+                    <button data-number="15" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">15</button>
+                    <button data-number="14" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">14</button>
+                    <button data-number="13" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">13</button>
+                    <button data-number="12" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">12</button>
+                    <button data-number="11" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">11</button>
+                    <button data-number="10" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">10</button>
+                    <button data-number="9" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">9</button>
+                    <button data-number="8" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">8</button>
+                    <button data-number="7" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">7</button>
+                    <button data-number="6" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">6</button>
+                    <button data-number="5" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">5</button>
+                    <button data-number="4" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">4</button>
+                    <button data-number="3" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">3</button>
+                    <button data-number="2" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">2</button>
+                    <button data-number="1" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">1</button>
+                </div>
+                <div class="grid grid-cols-4 gap-1.5">
+                    <button data-number="25" class="keypad-btn bg-gray-600 text-lg font-bold py-3 rounded-lg" data-i18n="bull">BULL</button>
+                    <button data-number="0" class="keypad-btn bg-gray-600 text-lg font-bold py-3 rounded-lg" data-i18n="miss">MISS</button>
+                    <button data-action="undo" class="keypad-btn bg-yellow-600 text-lg font-bold py-3 rounded-lg" data-i18n="undo">ZURÜCK</button>
+                    <button data-action="next" class="keypad-btn bg-green-600 text-lg font-bold py-3 rounded-lg" data-i18n="done">FERTIG</button>
+                </div>
+            `;
+        }
+
+        // Re-apply translations after changing keypad
+        if (window.setLanguage) {
+            const currentLang = localStorage.getItem('dartsScorerLanguage') || 'de';
+            window.setLanguage(currentLang).catch(error => {
+                console.error('Failed to apply language:', error);
+            });
+        }
     }
 
     function renderScoreboard() {
@@ -487,6 +666,36 @@ document.addEventListener('DOMContentLoaded', () => {
         let turnHasDoubled = false;
         const player = state.players[state.currentPlayerIndex];
 
+        // In score mode, show the input buffer
+        if (state.inputMode === 'score') {
+            if (scoreInputBuffer) {
+                // Show only the number on the right, no text on the left
+                turnTotalEl.textContent = scoreInputBuffer;
+                turnTotalEl.classList.remove('text-gray-500', 'text-red-400');
+            } else {
+                // Show error or placeholder
+                if (state.showError) {
+                    let errorText;
+                    if (window.getTranslation) {
+                        errorText = window.getTranslation('error_no_darts');
+                    } else {
+                        const lang = localStorage.getItem('dartsScorerLanguage') || navigator.language.split('-')[0];
+                        errorText = lang === 'en' ? 'Please enter score!' : 'Bitte Punktzahl eingeben!';
+                    }
+                    dartEntries.innerHTML = `<span class="text-red-400 font-medium text-center flex-1">${errorText}</span>`;
+                    turnTotalEl.textContent = '⚠️';
+                    turnTotalEl.classList.add('text-red-400');
+                    turnTotalEl.classList.remove('text-gray-500');
+                } else {
+                    turnTotalEl.textContent = '0';
+                    turnTotalEl.classList.add('text-gray-500');
+                    turnTotalEl.classList.remove('text-red-400');
+                }
+            }
+            return;
+        }
+
+        // Field mode - show individual darts
         // Show error message if no darts entered and user tried to submit
         if (state.showError && state.currentTurn.length === 0) {
             let errorText;
@@ -555,14 +764,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showSettingsModal() {
+        if (!settingsModal) {
+            console.error('Settings modal not loaded yet');
+            return;
+        }
+
         // Update checkbox states from current game state
-        doubleInCheck.checked = state.doubleIn;
-        doubleOutCheck.checked = state.doubleOut;
+        if (doubleInCheck) doubleInCheck.checked = state.doubleIn;
+        if (doubleOutCheck) doubleOutCheck.checked = state.doubleOut;
+
+        // Set input mode from current game state
+        if (inputModeSelect) {
+            inputModeSelect.value = state.inputMode;
+        }
 
         // Set current language in dropdown (already populated by localization.js)
         const currentLang = localStorage.getItem('dartsScorerLanguage') || 'de';
-        if (languageSelectGame) {
-            languageSelectGame.value = currentLang;
+        if (languageSelect) {
+            languageSelect.value = currentLang;
         }
 
         settingsModal.classList.remove('hidden');
