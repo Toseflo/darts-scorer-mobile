@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         localStorage.setItem('dartsGameSettings', JSON.stringify(gameSettings));
-        window.location.href = 'game.html';
+        window.location.href = 'game';
     });
 
     initPlayers();
