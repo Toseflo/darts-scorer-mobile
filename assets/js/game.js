@@ -614,21 +614,21 @@ document.addEventListener('DOMContentLoaded', () => {
             keypadGrid.className = 'space-y-1.5';
             keypadGrid.innerHTML = `
                 <div class="grid grid-cols-3 gap-1.5">
-                    <button data-digit="7" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">7</button>
-                    <button data-digit="8" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">8</button>
-                    <button data-digit="9" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">9</button>
-                    <button data-digit="4" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">4</button>
-                    <button data-digit="5" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">5</button>
-                    <button data-digit="6" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">6</button>
-                    <button data-digit="1" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">1</button>
-                    <button data-digit="2" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">2</button>
-                    <button data-digit="3" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">3</button>
-                    <button data-digit="0" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg col-span-2">0</button>
-                    <button data-action="clear" class="keypad-btn bg-yellow-600 text-lg font-bold py-3 rounded-lg">C</button>
+                    <button data-digit="7" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">7</button>
+                    <button data-digit="8" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">8</button>
+                    <button data-digit="9" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">9</button>
+                    <button data-digit="4" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">4</button>
+                    <button data-digit="5" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">5</button>
+                    <button data-digit="6" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">6</button>
+                    <button data-digit="1" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">1</button>
+                    <button data-digit="2" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">2</button>
+                    <button data-digit="3" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">3</button>
+                    <button data-digit="0" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg col-span-2">0</button>
+                    <button data-action="clear" class="keypad-btn special-btn btn-undo text-lg font-bold py-3 rounded-lg">C</button>
                 </div>
                 <div class="grid grid-cols-2 gap-1.5">
-                    <button data-action="undo" class="keypad-btn bg-yellow-600 text-lg font-bold py-3 rounded-lg" data-i18n="undo">ZURÜCK</button>
-                    <button data-action="next" class="keypad-btn bg-green-600 text-lg font-bold py-3 rounded-lg" data-i18n="done">FERTIG</button>
+                    <button data-action="undo" class="keypad-btn special-btn btn-undo text-lg font-bold py-3 rounded-lg" data-i18n="undo">ZURÜCK</button>
+                    <button data-action="next" class="keypad-btn special-btn btn-next text-lg font-bold py-3 rounded-lg" data-i18n="done">FERTIG</button>
                 </div>
             `;
         } else {
@@ -636,36 +636,36 @@ document.addEventListener('DOMContentLoaded', () => {
             keypadGrid.className = 'space-y-1.5';
             keypadGrid.innerHTML = `
                 <div class="grid grid-cols-2 gap-1.5">
-                    <button data-multiplier="3" class="multiplier-btn keypad-btn bg-gray-700 text-blue-300 text-lg font-bold py-3 rounded-lg" data-i18n="tripple">TRIPLE</button>
-                    <button data-multiplier="2" class="multiplier-btn keypad-btn bg-gray-700 text-green-300 text-lg font-bold py-3 rounded-lg" data-i18n="double">DOPPEL</button>
+                    <button data-multiplier="3" class="multiplier-btn keypad-btn btn-triple text-lg font-bold py-3 rounded-lg" data-i18n="tripple">TRIPLE</button>
+                    <button data-multiplier="2" class="multiplier-btn keypad-btn btn-double text-lg font-bold py-3 rounded-lg" data-i18n="double">DOPPEL</button>
                 </div>
                 <div class="grid grid-cols-4 gap-1.5">
-                    <button data-number="20" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">20</button>
-                    <button data-number="19" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">19</button>
-                    <button data-number="18" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">18</button>
-                    <button data-number="17" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">17</button>
-                    <button data-number="16" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">16</button>
-                    <button data-number="15" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">15</button>
-                    <button data-number="14" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">14</button>
-                    <button data-number="13" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">13</button>
-                    <button data-number="12" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">12</button>
-                    <button data-number="11" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">11</button>
-                    <button data-number="10" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">10</button>
-                    <button data-number="9" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">9</button>
-                    <button data-number="8" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">8</button>
-                    <button data-number="7" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">7</button>
-                    <button data-number="6" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">6</button>
-                    <button data-number="5" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">5</button>
-                    <button data-number="4" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">4</button>
-                    <button data-number="3" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">3</button>
-                    <button data-number="2" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">2</button>
-                    <button data-number="1" class="keypad-btn bg-gray-600 text-xl font-bold py-3 rounded-lg">1</button>
+                    <button data-number="17" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">17</button>
+                    <button data-number="18" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">18</button>
+                    <button data-number="19" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">19</button>
+                    <button data-number="20" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">20</button>
+                    <button data-number="13" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">13</button>
+                    <button data-number="14" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">14</button>
+                    <button data-number="15" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">15</button>
+                    <button data-number="16" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">16</button>
+                    <button data-number="9" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">9</button>
+                    <button data-number="10" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">10</button>
+                    <button data-number="11" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">11</button>
+                    <button data-number="12" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">12</button>
+                    <button data-number="5" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">5</button>
+                    <button data-number="6" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">6</button>
+                    <button data-number="7" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">7</button>
+                    <button data-number="8" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">8</button>
+                    <button data-number="1" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">1</button>
+                    <button data-number="2" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">2</button>
+                    <button data-number="3" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">3</button>
+                    <button data-number="4" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">4</button>
                 </div>
                 <div class="grid grid-cols-4 gap-1.5">
-                    <button data-number="25" class="keypad-btn bg-gray-600 text-lg font-bold py-3 rounded-lg" data-i18n="bull">BULL</button>
-                    <button data-number="0" class="keypad-btn bg-gray-600 text-lg font-bold py-3 rounded-lg" data-i18n="miss">MISS</button>
-                    <button data-action="undo" class="keypad-btn bg-yellow-600 text-lg font-bold py-3 rounded-lg" data-i18n="undo">ZURÜCK</button>
-                    <button data-action="next" class="keypad-btn bg-green-600 text-lg font-bold py-3 rounded-lg" data-i18n="done">FERTIG</button>
+                    <button data-number="25" class="keypad-btn number-btn text-lg font-bold py-3 rounded-lg" data-i18n="bull">BULL</button>
+                    <button data-number="0" class="keypad-btn number-btn text-lg font-bold py-3 rounded-lg" data-i18n="miss">MISS</button>
+                    <button data-action="undo" class="keypad-btn special-btn btn-undo text-lg font-bold py-3 rounded-lg" data-i18n="undo">ZURÜCK</button>
+                    <button data-action="next" class="keypad-btn special-btn btn-next text-lg font-bold py-3 rounded-lg" data-i18n="done">FERTIG</button>
                 </div>
             `;
         }
@@ -788,10 +788,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (hasInput && currentScore !== player.score) {
                     // Show current score with checkout
-                    scoreDisplay = `<div class="text-2xl font-bold text-blue-300 text-center" style="line-height: 1.2;">→ ${currentScore} <span class="text-lg text-yellow-400">${specialText}</span></div>`;
+                    scoreDisplay = `<div class="text-2xl font-bold score-display-current text-center" style="line-height: 1.2;">→ ${currentScore} <span class="text-lg score-special-text">${specialText}</span></div>`;
                 } else {
                     // Show only checkout when no darts thrown yet
-                    scoreDisplay = `<div class="text-lg font-medium text-yellow-400 text-center" style="line-height: 1.2; min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">${specialText}</div>`;
+                    scoreDisplay = `<div class="text-lg font-medium score-special-text text-center" style="line-height: 1.2; min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">${specialText}</div>`;
                 }
             } else {
                 // For inactive players
@@ -805,13 +805,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     scoreDisplay = `<div class="text-xs font-medium text-gray-400 text-center" style="min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">${hintText}</div>`;
                 } else {
                     // Show checkout for inactive players (when only 2 players)
-                    scoreDisplay = `<div class="text-sm font-medium text-yellow-400 text-center" style="min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">${specialText}</div>`;
+                    scoreDisplay = `<div class="text-sm font-medium score-special-text text-center" style="min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">${specialText}</div>`;
                 }
             }
 
             panel.innerHTML = `
                 <h2 class="text-base font-semibold truncate text-center">${player.name}</h2>
-                <div class="text-5xl font-extrabold text-center ${isActive ? 'text-blue-400' : 'text-gray-500'}" style="line-height: 1.1;">${player.score}</div>
+                <div class="text-5xl font-extrabold text-center ${isActive ? 'score-display-current' : 'score-display-inactive'}" style="line-height: 1.1;">${player.score}</div>
                 ${scoreDisplay}
             `;
             scoreboard.appendChild(panel);
@@ -840,9 +840,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const lang = storage.getItem('language') || navigator.language.split('-')[0];
                     errorText = lang === 'en' ? 'Please enter a number between 0 and 180!' : 'Bitte Zahl zwischen 0 und 180 eingeben!';
                 }
-                dartEntries.innerHTML = `<span class="text-red-400 font-medium text-center flex-1">${errorText}</span>`;
+                dartEntries.innerHTML = `<span class="score-error-text font-medium text-center flex-1">${errorText}</span>`;
                 turnTotalEl.textContent = '⚠️';
-                turnTotalEl.classList.add('text-red-400');
+                turnTotalEl.classList.add('score-error-text');
                 turnTotalEl.classList.remove('text-gray-500');
                 return;
             }
@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (scoreInputBuffer) {
                 // Show current input on the right
                 turnTotalEl.textContent = scoreInputBuffer;
-                turnTotalEl.classList.remove('text-gray-500', 'text-red-400');
+                turnTotalEl.classList.remove('score-display-inactive', 'score-error-text');
             } else {
                 // Show error or placeholder
                 if (state.showError) {
@@ -861,14 +861,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         const lang = storage.getItem('language') || navigator.language.split('-')[0];
                         errorText = lang === 'en' ? 'Please enter score!' : 'Bitte Punktzahl eingeben!';
                     }
-                    dartEntries.innerHTML = `<span class="text-red-400 font-medium text-center flex-1">${errorText}</span>`;
+                    dartEntries.innerHTML = `<span class="score-error-text font-medium text-center flex-1">${errorText}</span>`;
                     turnTotalEl.textContent = '⚠️';
-                    turnTotalEl.classList.add('text-red-400');
-                    turnTotalEl.classList.remove('text-gray-500');
+                    turnTotalEl.classList.add('score-error-text');
+                    turnTotalEl.classList.remove('score-display-inactive');
                 } else {
                     turnTotalEl.textContent = '0';
-                    turnTotalEl.classList.add('text-gray-500');
-                    turnTotalEl.classList.remove('text-red-400');
+                    turnTotalEl.classList.add('score-display-inactive');
+                    turnTotalEl.classList.remove('score-error-text');
                 }
             }
             return;
@@ -884,10 +884,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const lang = storage.getItem('language') || navigator.language.split('-')[0];
                 errorText = lang === 'en' ? 'Please enter at least one dart (or MISS)!' : 'Bitte mindestens einen Dart eingeben (oder MISS)!';
             }
-            dartEntries.innerHTML = `<span class="text-red-400 font-medium text-center flex-1">${errorText}</span>`;
+            dartEntries.innerHTML = `<span class="score-error-text font-medium text-center flex-1">${errorText}</span>`;
             turnTotalEl.textContent = '⚠️';
-            turnTotalEl.classList.add('text-red-400');
-            turnTotalEl.classList.remove('text-gray-500');
+            turnTotalEl.classList.add('score-error-text');
+            turnTotalEl.classList.remove('score-display-inactive');
             return;
         }
 
@@ -913,8 +913,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         turnTotalEl.textContent = displayTurnTotal;
-        turnTotalEl.classList.toggle('text-gray-500', displayTurnTotal === 0);
-        turnTotalEl.classList.remove('text-red-400');
+        turnTotalEl.classList.toggle('score-display-inactive', displayTurnTotal === 0);
+        turnTotalEl.classList.remove('score-error-text');
     }
 
     function showAllPlayersModal() {

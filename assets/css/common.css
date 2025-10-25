@@ -1,5 +1,68 @@
 /* Common styles for both setup and game pages */
 
+/* Color Variables */
+:root {
+    /* Primary Colors */
+    --color-primary: rgb(96 165 250);           /* blue-400 - main score, titles */
+    --color-primary-dark: rgb(59 130 246);      /* blue-500 - buttons, accents */
+    --color-primary-darker: rgb(37 99 235);     /* blue-600 - primary buttons */
+
+    /* Accent Colors */
+    --color-accent-turn-total: rgb(243 244 246);    /* gray-100 - turn total highlight */
+    --color-accent-violet: rgb(167 139 250);    /* violet-400 - triple button */
+    --color-accent-emerald: rgb(52 211 153);    /* emerald-400 - double button */
+
+    /* Action Colors */
+    --color-action-orange: rgb(249 115 22);     /* orange-500 - undo/back */
+    --color-action-green: rgb(16 185 129);      /* emerald-500 - next/done */
+    --color-action-red: rgb(239 68 68);         /* red-500 - reset/delete */
+
+    /* UI Colors */
+    --color-yellow-special: rgb(250 204 21);    /* yellow-400 - winner, special */
+    --color-red-error: rgb(248 113 113);        /* red-400 - errors */
+
+    /* Background Colors */
+    --color-bg-dark: rgb(17 24 39);             /* gray-900 */
+    --color-bg-card: rgb(31 41 55);             /* gray-800 */
+    --color-bg-input: rgb(55 65 81);            /* gray-700 */
+    --color-bg-button: rgb(75 85 99);           /* gray-600 */
+
+    /* Text Colors */
+    --color-text-primary: rgb(255 255 255);     /* white */
+    --color-text-secondary: rgb(209 213 219);   /* gray-300 */
+    --color-text-muted: rgb(156 163 175);       /* gray-400 */
+    --color-text-inactive: rgb(107 114 128);    /* gray-500 */
+
+    /* Border Colors */
+    --color-border: rgb(75 85 99);              /* gray-600 */
+}
+
+/* Global select styling to override Tailwind */
+select {
+    background-color: var(--color-bg-input) !important;
+    border: 1px solid var(--color-border) !important;
+    color: var(--color-text-primary) !important;
+}
+
+select:focus {
+    border-color: var(--color-primary-dark) !important;
+    box-shadow: 0 0 0 1px var(--color-primary-dark) !important;
+}
+
+/* Global input styling to override Tailwind */
+input[type="text"],
+input[type="number"] {
+    background-color: var(--color-bg-input) !important;
+    border: 1px solid var(--color-border) !important;
+    color: var(--color-text-primary) !important;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus {
+    border-color: var(--color-primary-dark) !important;
+    box-shadow: 0 0 0 1px var(--color-primary-dark) !important;
+}
+
 /* Prevent scrolling and handle mobile browser bars */
 html, body {
     margin: 0;
@@ -54,14 +117,14 @@ html, body {
     font-size: 2.25rem;
     font-weight: 700;
     text-align: center;
-    color: rgb(96 165 250);
+    color: var(--color-primary);
 }
 
 .modal-title {
     font-size: 1.5rem;
     font-weight: 700;
     text-align: center;
-    color: rgb(96 165 250);
+    color: var(--color-primary);
     margin-bottom: 1rem;
 }
 
@@ -69,7 +132,7 @@ html, body {
     display: block;
     font-size: 0.875rem;
     font-weight: 500;
-    color: rgb(209 213 219);
+    color: var(--color-text-secondary);
 }
 
 .flex-row {
@@ -167,8 +230,8 @@ html, body {
 .btn-modal-close {
     flex: 1;
     width: 100%;
-    background-color: rgb(75 85 99);
-    color: white;
+    background-color: var(--color-bg-button);
+    color: var(--color-text-primary);
     font-weight: 500;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
@@ -178,15 +241,15 @@ html, body {
 
 .btn-confirm-no:hover,
 .btn-modal-close:hover {
-    background-color: rgb(55 65 81);
+    background-color: var(--color-bg-input);
 }
 
 .btn-confirm-yes,
 .btn-modal-action {
     flex: 1;
     width: 100%;
-    background-color: rgb(37 99 235);
-    color: white;
+    background-color: var(--color-primary-darker);
+    color: var(--color-text-primary);
     font-weight: 500;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
@@ -196,12 +259,39 @@ html, body {
 
 .btn-confirm-yes:hover,
 .btn-modal-action:hover {
-    background-color: rgb(29 78 216);
+    background-color: var(--color-primary-dark);
 }
 
 .btn-modal-action-bold {
     font-weight: 700;
     padding: 0.75rem 1rem;
+}
+
+/* Modal checkbox styles */
+.modal-checkbox {
+    height: 1rem;
+    width: 1rem;
+    background-color: var(--color-bg-input) !important;
+    border-color: var(--color-border) !important;
+    border-radius: 0.25rem;
+}
+
+.modal-checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-primary-dark) !important;
+}
+
+.modal-label {
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.modal-description {
+    color: var(--color-text-muted);
+}
+
+.modal-divider {
+    border-color: var(--color-border);
 }
 
 

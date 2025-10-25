@@ -1,44 +1,44 @@
 <!-- Settings Modal -->
 <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
-    <div class="bg-gray-800 rounded-lg p-6 w-full max-w-sm text-center shadow-2xl">
-        <h2 class="text-2xl font-bold text-blue-400 mb-6" data-i18n="settings">Einstellungen</h2>
+    <div class="modal-box rounded-lg p-6 w-full max-w-sm text-center shadow-2xl">
+        <h2 class="text-2xl font-bold modal-title mb-6" data-i18n="settings">Einstellungen</h2>
         <div class="space-y-4 text-left">
             <div class="relative flex items-start">
                 <div class="flex items-center h-5">
-                    <input id="double-in-check" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded">
+                    <input id="double-in-check" type="checkbox" class="modal-checkbox">
                 </div>
                 <div class="ml-3 text-sm">
-                    <label for="double-in-check" class="font-medium text-gray-300" data-i18n="double_in">Double In</label>
-                    <p class="text-gray-400" data-i18n="double_in_desc">Das Spiel muss mit einem Doppel begonnen werden.</p>
+                    <label for="double-in-check" class="modal-label" data-i18n="double_in">Double In</label>
+                    <p class="modal-description" data-i18n="double_in_desc">Das Spiel muss mit einem Doppel begonnen werden.</p>
                 </div>
             </div>
             <div class="relative flex items-start">
                 <div class="flex items-center h-5">
-                    <input id="double-out-check" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded">
+                    <input id="double-out-check" type="checkbox" class="modal-checkbox">
                 </div>
                 <div class="ml-3 text-sm">
-                    <label for="double-out-check" class="font-medium text-gray-300" data-i18n="double_out">Double Out</label>
-                    <p class="text-gray-400" data-i18n="double_out_desc">Das Spiel muss mit einem Doppel beendet werden.</p>
+                    <label for="double-out-check" class="modal-label" data-i18n="double_out">Double Out</label>
+                    <p class="modal-description" data-i18n="double_out_desc">Das Spiel muss mit einem Doppel beendet werden.</p>
                 </div>
             </div>
-            <div class="border-t border-gray-700 my-4"></div>
+            <div class="border-t modal-divider my-4"></div>
             <div>
-                <label for="input-mode-select" class="block text-sm font-medium text-gray-300 mb-1" data-i18n="input_mode">Eingabemodus</label>
-                <p class="text-gray-400 text-xs mb-2" data-i18n="input_mode_desc">Wählen Sie, wie Sie Ihre Würfe eingeben möchten.</p>
-                <select id="input-mode-select" class="block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <label for="input-mode-select" class="block text-sm modal-label mb-1" data-i18n="input_mode">Eingabemodus</label>
+                <p class="modal-description text-xs mb-2" data-i18n="input_mode_desc">Wählen Sie, wie Sie Ihre Würfe eingeben möchten.</p>
+                <select id="input-mode-select" class="select-field block w-full shadow-sm py-2 px-3 focus:outline-none">
                     <option value="field" data-i18n="input_mode_field">Feld-Eingabe</option>
                     <option value="score" data-i18n="input_mode_score">Punktzahl-Eingabe</option>
                 </select>
             </div>
-            <div class="border-t border-gray-700 my-4"></div>
+            <div class="border-t modal-divider my-4"></div>
             <div>
-                <label for="language-select" class="block text-sm font-medium text-gray-300" data-i18n="language">Sprache</label>
-                <select id="language-select" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <label for="language-select" class="block text-sm modal-label" data-i18n="language">Sprache</label>
+                <select id="language-select" class="select-field mt-1 block w-full shadow-sm py-2 px-3 focus:outline-none">
                     <!-- Languages will be dynamically loaded -->
                 </select>
             </div>
         </div>
-        <button id="close-modal-btn" class="mt-6 w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg shadow transition duration-200" data-i18n="close">
+        <button id="close-modal-btn" class="btn-modal-close mt-6 w-full font-medium py-2 px-4 rounded-lg shadow transition duration-200" data-i18n="close">
             Schließen
         </button>
     </div>
