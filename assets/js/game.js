@@ -18,16 +18,6 @@ function navigateToSetup() {
     window.location.href = path;
 }
 
-// Project identifier for localStorage to avoid conflicts with other projects on same domain
-const PROJECT_PREFIX = 'dartsScorer_';
-
-// Helper functions for localStorage with project prefix
-const storage = {
-    getItem: (key) => localStorage.getItem(PROJECT_PREFIX + key),
-    setItem: (key, value) => localStorage.setItem(PROJECT_PREFIX + key, value),
-    removeItem: (key) => localStorage.removeItem(PROJECT_PREFIX + key)
-};
-
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const get = (id) => document.getElementById(id);
@@ -87,8 +77,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     async function init() {
-        const settings = JSON.parse(storage.getItem('gameSettings'));
+        // Load settings (user preferences)
+        let settings = JSON.parse(storage.getItem('settings'));
         if (!settings) {
+            // Create default settings - use browser language or fallback to 'en'
+            const defaultLang = window.getInitialLanguage ? window.getInitialLanguage() : (navigator.language.split('-')[0] || 'en');
+            settings = {
+                points: 501,
+                doubleIn: false,
+                doubleOut: true,
+                inputMode: 'field',
+                language: defaultLang,
+                defaultPoints: 501
+            };
+            storage.setItem('settings', JSON.stringify(settings));
+        }
+
+        // Load setup data (players for this game)
+        const setupData = JSON.parse(storage.getItem('setupData'));
+        if (!setupData || !setupData.players || setupData.players.length === 0) {
+            // No setup data - go to setup page
             navigateToSetup();
             return;
         }
@@ -128,30 +136,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     // User clicked No - delete saved game
                     storage.removeItem('gameState');
-                    initNewGame(settings);
+                    initNewGame(settings, setupData);
                 }
             } else {
                 // No actual game progress, just start new game and clean up old state
                 storage.removeItem('gameState');
-                initNewGame(settings);
+                initNewGame(settings, setupData);
             }
         } else {
-            initNewGame(settings);
+            initNewGame(settings, setupData);
         }
+
 
         addEventListeners();
         renderKeypad();
         render();
     }
 
-    function initNewGame(settings) {
+    function initNewGame(settings, setupData) {
         state = {
-            gameType: parseInt(settings.points, 10),
+            gameType: parseInt(setupData.points, 10),
             doubleIn: settings.doubleIn,
             doubleOut: settings.doubleOut,
-            nextPlayerMode: settings.nextPlayerMode || 'next',
-            inputMode: settings.inputMode || storage.getItem('inputMode') || 'field',
-            players: settings.players.map(name => createPlayer(name, parseInt(settings.points, 10))),
+            nextPlayerMode: 'next',
+            inputMode: settings.inputMode,
+            players: setupData.players.map(name => createPlayer(name, parseInt(setupData.points, 10))),
             currentPlayerIndex: 0,
             legStarterIndex: 0,
             currentTurn: [],
@@ -228,6 +237,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Set current language value in the select
+        if (languageSelect) {
+            const settings = JSON.parse(storage.getItem('settings'));
+            if (settings && settings.language) {
+                languageSelect.value = settings.language;
+            }
+        }
+
         // Settings modal event listeners
         closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
         settingsModal.addEventListener('click', (e) => {
@@ -249,7 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         inputModeSelect.addEventListener('change', (e) => {
             state.inputMode = e.target.value;
-            storage.setItem('inputMode', e.target.value);
             scoreInputBuffer = ''; // Clear buffer when switching modes
             state.currentTurn = []; // Clear current turn when switching modes
             // Update settings in localStorage
@@ -526,36 +542,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetGame() {
         storage.removeItem('gameState');
+        storage.removeItem('setupData'); // Clear setup data to force new player input
 
-        // Keep current settings (double in/out, input mode, language)
-        // but reset to allow new player setup
-        const currentSettings = JSON.parse(storage.getItem('gameSettings'));
-        if (currentSettings) {
-            // Keep settings but clear players to force new setup
-            const preservedSettings = {
-                points: currentSettings.points,
-                players: [], // Clear players to show setup screen
-                doubleIn: state.doubleIn, // Use current game state
-                doubleOut: state.doubleOut,
-                inputMode: state.inputMode,
-                nextPlayerMode: state.nextPlayerMode || 'next'
-            };
-            storage.setItem('gameSettings', JSON.stringify(preservedSettings));
-        }
+        // Update settings with current game settings
+        updateSettings();
 
         navigateToSetup();
     }
 
     function updateSettings() {
         // Update only the settings in localStorage, not the game state
-        const currentSettings = JSON.parse(storage.getItem('gameSettings'));
-        if (currentSettings) {
-            currentSettings.doubleIn = state.doubleIn;
-            currentSettings.doubleOut = state.doubleOut;
-            currentSettings.inputMode = state.inputMode;
-            currentSettings.nextPlayerMode = state.nextPlayerMode;
-            storage.setItem('gameSettings', JSON.stringify(currentSettings));
+        let currentSettings = JSON.parse(storage.getItem('settings'));
+        if (!currentSettings) {
+            // Get language from settings if exists, otherwise default
+            const existingSettings = JSON.parse(storage.getItem('settings'));
+            currentSettings = {
+                doubleIn: false,
+                doubleOut: true,
+                inputMode: 'field',
+                language: existingSettings?.language || 'de',
+                defaultPoints: 501
+            };
         }
+
+        // Update game-related settings, but preserve language
+        currentSettings.doubleIn = state.doubleIn;
+        currentSettings.doubleOut = state.doubleOut;
+        currentSettings.inputMode = state.inputMode;
+        // Keep existing language and defaultPoints
+
+        storage.setItem('settings', JSON.stringify(currentSettings));
     }
 
     function saveState() {
@@ -656,7 +672,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Re-apply translations after changing keypad
         if (window.setLanguage) {
-            const currentLang = localStorage.getItem('dartsScorerLanguage') || 'de';
+            const settings = JSON.parse(storage.getItem('settings'));
+            const currentLang = settings && settings.language ? settings.language : 'en';
             window.setLanguage(currentLang).catch(error => {
                 console.error('Failed to apply language:', error);
             });
@@ -753,7 +770,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     specialText = window.getTranslation('double_in_required');
                 } else {
                     // Fallback based on browser language
-                    const lang = localStorage.getItem('dartsScorerLanguage') || navigator.language.split('-')[0];
+                    const lang = storage.getItem('language') || navigator.language.split('-')[0];
                     specialText = lang === 'en' ? 'Double In required' : 'Double In benötigt';
                 }
             } else if (checkout) {
@@ -820,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (window.getTranslation) {
                     errorText = window.getTranslation('error_invalid_score');
                 } else {
-                    const lang = localStorage.getItem('dartsScorerLanguage') || navigator.language.split('-')[0];
+                    const lang = storage.getItem('language') || navigator.language.split('-')[0];
                     errorText = lang === 'en' ? 'Please enter a number between 0 and 180!' : 'Bitte Zahl zwischen 0 und 180 eingeben!';
                 }
                 dartEntries.innerHTML = `<span class="text-red-400 font-medium text-center flex-1">${errorText}</span>`;
@@ -841,7 +858,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (window.getTranslation) {
                         errorText = window.getTranslation('error_no_darts');
                     } else {
-                        const lang = localStorage.getItem('dartsScorerLanguage') || navigator.language.split('-')[0];
+                        const lang = storage.getItem('language') || navigator.language.split('-')[0];
                         errorText = lang === 'en' ? 'Please enter score!' : 'Bitte Punktzahl eingeben!';
                     }
                     dartEntries.innerHTML = `<span class="text-red-400 font-medium text-center flex-1">${errorText}</span>`;
@@ -864,7 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.getTranslation) {
                 errorText = window.getTranslation('error_no_darts');
             } else {
-                const lang = localStorage.getItem('dartsScorerLanguage') || navigator.language.split('-')[0];
+                const lang = storage.getItem('language') || navigator.language.split('-')[0];
                 errorText = lang === 'en' ? 'Please enter at least one dart (or MISS)!' : 'Bitte mindestens einen Dart eingeben (oder MISS)!';
             }
             dartEntries.innerHTML = `<span class="text-red-400 font-medium text-center flex-1">${errorText}</span>`;
@@ -941,7 +958,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Set current language in dropdown (already populated by localization.js)
-        const currentLang = localStorage.getItem('dartsScorerLanguage') || 'de';
+        const settings = JSON.parse(storage.getItem('settings'));
+        const currentLang = settings && settings.language ? settings.language : 'en';
         if (languageSelect) {
             languageSelect.value = currentLang;
         }

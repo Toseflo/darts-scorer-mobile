@@ -147,24 +147,44 @@ document.addEventListener('DOMContentLoaded', () => {
             await loadTranslations(lang);
         }
         translatePage(lang);
-        localStorage.setItem('dartsScorerLanguage', lang);
 
-        // Update both language selects
+        // Update the HTML lang attribute
+        document.documentElement.lang = lang;
+
+        // Update language in settings
+        let settings = JSON.parse(storage.getItem('settings'));
+        if (!settings) {
+            settings = {
+                doubleIn: false,
+                doubleOut: true,
+                inputMode: 'field',
+                language: lang,
+                defaultPoints: 501
+            };
+        } else {
+            settings.language = lang;
+        }
+        storage.setItem('settings', JSON.stringify(settings));
+
+        // Update language select
         const langSelect = document.getElementById('language-select');
         if (langSelect) langSelect.value = lang;
-
-        const langSelectGame = document.getElementById('language-select-game');
-        if (langSelectGame) langSelectGame.value = lang;
     };
 
     const getTranslation = (key) => {
-        const lang = localStorage.getItem('dartsScorerLanguage') || 'en';
+        const settings = JSON.parse(storage.getItem('settings'));
+        const lang = settings && settings.language ? settings.language : 'en';
         return (translations[lang] && translations[lang][key]) || key;
     };
 
 
     const getInitialLanguage = () => {
-        return localStorage.getItem('dartsScorerLanguage') || navigator.language.split('-')[0] || 'en';
+        const settings = JSON.parse(storage.getItem('settings'));
+        if (settings && settings.language) {
+            return settings.language;
+        }
+        // Only use browser language as fallback if no settings exist at all
+        return navigator.language.split('-')[0] || 'en';
     };
 
     // Initialize
@@ -185,13 +205,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Make setLanguage globally available
+        // Make functions globally available
         window.setLanguage = setLanguage;
         window.getTranslation = getTranslation;
+        window.getInitialLanguage = getInitialLanguage; // Make available for other scripts
         // customConfirm is already set globally at the top
 
-        // Set initial language
-        await setLanguage(selectedLang);
+        // Set the language immediately to avoid flash of wrong language
+        // But only if it hasn't been set yet (to avoid overwriting correct language)
+        const currentLang = document.documentElement.lang;
+        if (!currentLang || currentLang === '' || currentLang !== selectedLang) {
+            await setLanguage(selectedLang);
+        }
     };
 
     // Initialize (settings modal should be loaded synchronously by now)
