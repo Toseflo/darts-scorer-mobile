@@ -44,6 +44,7 @@
     "input_mode_field": "Feld-Eingabe",
     "input_mode_score": "Punktzahl-Eingabe",
     "input_mode_desc": "Wählen Sie, wie Sie Ihre Würfe eingeben möchten.",
-    "tap_for_all_players": "👥 Tippen für alle"
+    "tap_for_all_players": "👥 Tippen für alle",
+    "error_invalid_score": "Bitte Zahl zwischen 0 und 180 eingeben!"
 }
 

@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (result) {
                     state = savedState;
                     state.showError = false;
+                    state.showInvalidInputError = state.showInvalidInputError || false;
                 } else {
                     // User clicked No - delete saved game
                     storage.removeItem('gameState');
@@ -155,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             legStarterIndex: 0,
             currentTurn: [],
             showError: false,
+            showInvalidInputError: false,
         };
     }
 
@@ -172,6 +174,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function addEventListeners() {
         keypad.addEventListener('click', handleKeypadClick);
         scoreboard.addEventListener('click', showAllPlayersModal);
+
+        // Add keyboard support for score input mode
+        document.addEventListener('keydown', handleKeyboardInput);
+
         closeModalBtn.addEventListener('click', () => allPlayersModal.classList.add('hidden'));
         allPlayersModal.addEventListener('click', (e) => {
             if (e.target === allPlayersModal) {
@@ -290,9 +296,54 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function handleKeyboardInput(e) {
+        // Only handle keyboard input in score mode
+        if (state.inputMode !== 'score') return;
+
+        // Ignore if modal is open
+        if (allPlayersModal && !allPlayersModal.classList.contains('hidden')) return;
+        if (gameOverModal && !gameOverModal.classList.contains('hidden')) return;
+        if (settingsModal && !settingsModal.classList.contains('hidden')) return;
+
+        // Handle number keys (0-9)
+        if (e.key >= '0' && e.key <= '9') {
+            e.preventDefault();
+            handleDigitInput(e.key);
+        }
+        // Handle Backspace
+        else if (e.key === 'Backspace') {
+            e.preventDefault();
+            if (scoreInputBuffer.length > 0) {
+                // Remove last digit
+                scoreInputBuffer = scoreInputBuffer.slice(0, -1);
+                render();
+            } else {
+                // If buffer is empty, trigger undo
+                handleUndo();
+            }
+        }
+        // Handle Enter
+        else if (e.key === 'Enter') {
+            e.preventDefault();
+            submitTurn();
+        }
+        // Handle Escape to clear buffer
+        else if (e.key === 'Escape') {
+            e.preventDefault();
+            scoreInputBuffer = '';
+            render();
+        }
+    }
+
     function handleDigitInput(digit) {
         // In score mode, we're entering the total score for the turn, not individual darts
         scoreInputBuffer += digit;
+
+        // Clear any invalid input error when user starts typing
+        if (state.showInvalidInputError) {
+            state.showInvalidInputError = false;
+        }
+
         render();
     }
 
@@ -353,17 +404,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (scoreInputBuffer === '') {
                 // No score entered
                 state.showError = true;
+                state.showInvalidInputError = false;
                 render();
                 return;
             }
 
             const totalScore = parseInt(scoreInputBuffer, 10);
             if (isNaN(totalScore) || totalScore < 0 || totalScore > 180) {
-                // Invalid score
-                scoreInputBuffer = '';
+                // Invalid score - show error and clear buffer
+                state.showInvalidInputError = true;
+                state.showError = false;
+                scoreInputBuffer = ''; // Clear buffer so user can start fresh
                 render();
                 return;
             }
+
+            // Valid score - clear any errors
+            state.showInvalidInputError = false;
 
             // Store total score as a single "turn" entry
             state.currentTurn = [{ value: totalScore, multiplier: 1, score: totalScore }];
@@ -757,6 +814,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // In score mode, show the input buffer
         if (state.inputMode === 'score') {
+            // Check for invalid input error first
+            if (state.showInvalidInputError) {
+                let errorText;
+                if (window.getTranslation) {
+                    errorText = window.getTranslation('error_invalid_score');
+                } else {
+                    const lang = localStorage.getItem('dartsScorerLanguage') || navigator.language.split('-')[0];
+                    errorText = lang === 'en' ? 'Please enter a number between 0 and 180!' : 'Bitte Zahl zwischen 0 und 180 eingeben!';
+                }
+                dartEntries.innerHTML = `<span class="text-red-400 font-medium text-center flex-1">${errorText}</span>`;
+                turnTotalEl.textContent = '⚠️';
+                turnTotalEl.classList.add('text-red-400');
+                turnTotalEl.classList.remove('text-gray-500');
+                return;
+            }
+
             if (scoreInputBuffer) {
                 // Show current input on the right
                 turnTotalEl.textContent = scoreInputBuffer;
