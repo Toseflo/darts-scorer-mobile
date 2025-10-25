@@ -21,9 +21,23 @@
             user-select: none;
             -webkit-user-select: none;
         }
+        /* Prevent scrolling */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+        #app {
+            height: 100vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen overscroll-contain" data-i18n-title="title_game">
+<body class="bg-gray-900 text-white overscroll-contain" data-i18n-title="title_game">
 
     <div id="app" class="max-w-lg mx-auto p-2 pb-4">
         <div id="gameScreen">
