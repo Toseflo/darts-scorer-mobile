@@ -2,13 +2,45 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Darts Scorer - Setup</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        /* Prevent scrolling and handle mobile browser bars */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .main-container {
+            height: 100vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+        }
+        @supports (height: 100dvh) {
+            .main-container {
+                height: 100dvh; /* Dynamic viewport height for mobile browsers */
+            }
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen" data-i18n-title="title_setup">
+<body class="bg-gray-900 text-white" data-i18n-title="title_setup">
 
+    <div class="main-container">
     <div class="w-full max-w-md p-6 space-y-6">
         <h1 class="text-4xl font-bold text-center text-blue-400" data-i18n="main_title">Darts Scorer</h1>
 
@@ -80,6 +112,7 @@
             </button>
         </div>
     </div>
+    </div> <!-- Close main-container -->
 
     <!-- Custom Confirm Dialog -->
     <div id="confirm-dialog" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
