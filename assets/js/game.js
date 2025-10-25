@@ -276,9 +276,16 @@ document.addEventListener('DOMContentLoaded', () => {
         statsDisplay.innerHTML = '';
         const currentPlayer = state.players[state.currentPlayerIndex];
 
-        let playersToShow = [currentPlayer];
+        let playersToShow;
 
-        if (state.players.length > 1) {
+        // For exactly 2 players, always show both in fixed positions
+        if (state.players.length === 2) {
+            playersToShow = [state.players[0], state.players[1]];
+        } else if (state.players.length === 1) {
+            playersToShow = [currentPlayer];
+        } else {
+            // For 3+ players, show current player and next player
+            playersToShow = [currentPlayer];
             let nextPlayer;
             if (state.nextPlayerMode === 'best') {
                 nextPlayer = [...state.players]
