@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playersToShow.forEach((player) => {
             const isActive = player === currentPlayer;
             const panel = document.createElement('div');
-            panel.className = `player-panel ${panelWidth} bg-gray-800 p-3 rounded-lg border-2 border-gray-700 transition-all duration-300 ${isActive ? 'player-active' : ''}`;
+            panel.className = `player-panel ${panelWidth} bg-gray-800 p-2 rounded-lg border-2 border-gray-700 transition-all duration-300 ${isActive ? 'player-active' : ''}`;
 
             const avg = player.dartsThrown > 0 ? ((state.gameType - player.score) / player.dartsThrown) * 3 : 0;
             const high = player.history.length > 0 ? Math.max(0, ...player.history) : 0;
@@ -360,19 +360,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isActive) {
                 if (state.currentTurn.length > 0 && currentScore !== player.score) {
                     // Show current score with checkout
-                    scoreDisplay = `<div class="text-3xl font-bold text-blue-300 text-center" style="line-height: 1.2;">→ ${currentScore} <span class="text-xl text-yellow-400">${specialText}</span></div>`;
+                    scoreDisplay = `<div class="text-2xl font-bold text-blue-300 text-center" style="line-height: 1.2;">→ ${currentScore} <span class="text-lg text-yellow-400">${specialText}</span></div>`;
                 } else {
                     // Show only checkout when no darts thrown yet
-                    scoreDisplay = `<div class="text-xl font-medium text-yellow-400 text-center" style="line-height: 1.2; min-height: 3rem; display: flex; align-items: center; justify-content: center;">${specialText}</div>`;
+                    scoreDisplay = `<div class="text-lg font-medium text-yellow-400 text-center" style="line-height: 1.2; min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">${specialText}</div>`;
                 }
             } else {
                 // For inactive players, show checkout below
-                scoreDisplay = `<div class="text-sm font-medium text-yellow-400 text-center" style="min-height: 3rem; display: flex; align-items: center; justify-content: center;">${specialText}</div>`;
+                scoreDisplay = `<div class="text-sm font-medium text-yellow-400 text-center" style="min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">${specialText}</div>`;
             }
 
             panel.innerHTML = `
-                <h2 class="text-lg font-semibold truncate text-center">${player.name}</h2>
-                <div class="text-6xl font-extrabold text-center ${isActive ? 'text-blue-400' : 'text-gray-500'}" style="line-height: 1.1;">${player.score}</div>
+                <h2 class="text-base font-semibold truncate text-center">${player.name}</h2>
+                <div class="text-5xl font-extrabold text-center ${isActive ? 'text-blue-400' : 'text-gray-500'}" style="line-height: 1.1;">${player.score}</div>
                 ${scoreDisplay}
             `;
             scoreboard.appendChild(panel);
