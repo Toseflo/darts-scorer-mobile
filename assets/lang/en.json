@@ -18,7 +18,7 @@
     "confirm_reset_game": "Are you sure you want to reset the game and return to setup?",
     "alert_min_one_player": "Please add at least one player.",
     "all_players": "All Players",
-    "show_next_player": "Show next player:",
+    "second_panel_display": "Right score shows:",
     "next_in_line": "Next in line",
     "best_player": "Best player",
     "game_over_won": "has won the leg!",
@@ -43,6 +43,7 @@
     "input_mode": "Input Mode",
     "input_mode_field": "Field Input",
     "input_mode_score": "Score Input",
-    "input_mode_desc": "Choose how you want to enter your throws."
+    "input_mode_desc": "Choose how you want to enter your throws.",
+    "tap_for_all_players": "👥 Tap for all"
 }
 

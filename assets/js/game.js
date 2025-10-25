@@ -652,8 +652,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     scoreDisplay = `<div class="text-lg font-medium text-yellow-400 text-center" style="line-height: 1.2; min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">${specialText}</div>`;
                 }
             } else {
-                // For inactive players, show checkout below
-                scoreDisplay = `<div class="text-sm font-medium text-yellow-400 text-center" style="min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">${specialText}</div>`;
+                // For inactive players
+                // Show "Tap for all players" hint for second player when 3+ players
+                const isSecondPanel = playersToShow.indexOf(player) === 1;
+                if (state.players.length >= 3 && isSecondPanel) {
+                    // Show hint to tap for all players instead of checkout
+                    const hintText = window.getTranslation
+                        ? window.getTranslation('tap_for_all_players')
+                        : '👥 Tippen für alle';
+                    scoreDisplay = `<div class="text-xs font-medium text-gray-400 text-center" style="min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">${hintText}</div>`;
+                } else {
+                    // Show checkout for inactive players (when only 2 players)
+                    scoreDisplay = `<div class="text-sm font-medium text-yellow-400 text-center" style="min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">${specialText}</div>`;
+                }
             }
 
             panel.innerHTML = `
