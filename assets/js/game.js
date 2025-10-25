@@ -48,21 +48,31 @@ document.addEventListener('DOMContentLoaded', () => {
     let scoreInputBuffer = ''; // Buffer for score input mode
 
     // --- Initial Load ---
-    fetch('../assets/data/checkouts.json')
-        .then(response => response.json())
-        .then(data => {
-            CHECKOUTS = data;
-            init().catch(error => {
-                console.error('Failed to initialize game:', error);
-            });
-        })
-        .catch(error => {
+    const initializeGame = async () => {
+        // Wait for translations to be loaded
+        let attempts = 0;
+        while (!window.getTranslation && attempts < 50) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+
+        // Load checkouts data
+        try {
+            const response = await fetch('../assets/data/checkouts.json');
+            if (response.ok) {
+                CHECKOUTS = await response.json();
+            }
+        } catch (error) {
             console.error("Could not load checkout data:", error);
-            // Optionally, initialize without checkouts
-            init().catch(error => {
-                console.error('Failed to initialize game:', error);
-            });
-        });
+        }
+
+        // Initialize the game
+        await init();
+    };
+
+    initializeGame().catch(error => {
+        console.error('Failed to initialize game:', error);
+    });
 
 
     async function init() {
