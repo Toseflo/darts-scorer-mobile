@@ -614,21 +614,21 @@ document.addEventListener('DOMContentLoaded', () => {
             keypadGrid.className = 'space-y-1.5';
             keypadGrid.innerHTML = `
                 <div class="grid grid-cols-3 gap-1.5">
-                    <button data-digit="7" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">7</button>
-                    <button data-digit="8" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">8</button>
-                    <button data-digit="9" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">9</button>
-                    <button data-digit="4" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">4</button>
-                    <button data-digit="5" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">5</button>
-                    <button data-digit="6" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">6</button>
-                    <button data-digit="1" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">1</button>
-                    <button data-digit="2" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">2</button>
-                    <button data-digit="3" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">3</button>
-                    <button data-digit="0" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg col-span-2">0</button>
-                    <button data-action="clear" class="keypad-btn special-btn btn-undo text-lg font-bold py-3 rounded-lg">C</button>
+                    <button data-digit="7" class="keypad-btn number-btn text-xl font-bold py-5 rounded-lg">7</button>
+                    <button data-digit="8" class="keypad-btn number-btn text-xl font-bold py-5 rounded-lg">8</button>
+                    <button data-digit="9" class="keypad-btn number-btn text-xl font-bold py-5 rounded-lg">9</button>
+                    <button data-digit="4" class="keypad-btn number-btn text-xl font-bold py-5 rounded-lg">4</button>
+                    <button data-digit="5" class="keypad-btn number-btn text-xl font-bold py-5 rounded-lg">5</button>
+                    <button data-digit="6" class="keypad-btn number-btn text-xl font-bold py-5 rounded-lg">6</button>
+                    <button data-digit="1" class="keypad-btn number-btn text-xl font-bold py-5 rounded-lg">1</button>
+                    <button data-digit="2" class="keypad-btn number-btn text-xl font-bold py-5 rounded-lg">2</button>
+                    <button data-digit="3" class="keypad-btn number-btn text-xl font-bold py-5 rounded-lg">3</button>
+                    <button data-digit="0" class="keypad-btn number-btn text-xl font-bold py-5 rounded-lg col-span-2">0</button>
+                    <button data-action="clear" class="keypad-btn special-btn btn-undo text-lg font-bold py-5 rounded-lg">C</button>
                 </div>
                 <div class="grid grid-cols-2 gap-1.5">
-                    <button data-action="undo" class="keypad-btn special-btn btn-undo text-lg font-bold py-3 rounded-lg" data-i18n="undo">ZURÜCK</button>
-                    <button data-action="next" class="keypad-btn special-btn btn-next text-lg font-bold py-3 rounded-lg" data-i18n="done">FERTIG</button>
+                    <button data-action="undo" class="keypad-btn special-btn btn-undo text-lg font-bold py-4 rounded-lg" data-i18n="undo">ZURÜCK</button>
+                    <button data-action="next" class="keypad-btn special-btn btn-next text-lg font-bold py-4 rounded-lg" data-i18n="done">FERTIG</button>
                 </div>
             `;
         } else {
