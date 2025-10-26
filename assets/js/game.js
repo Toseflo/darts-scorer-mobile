@@ -77,22 +77,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     async function init() {
-        // Load settings (user preferences)
-        let settings = JSON.parse(storage.getItem('settings'));
+        // Load settings using centralized function
+        let settings = window.loadSettings();
         if (!settings) {
-            // Create default settings - use browser language or fallback to 'en'
-            const defaultLang = window.getInitialLanguage ? window.getInitialLanguage() : (navigator.language.split('-')[0] || 'en');
-            settings = {
-                points: 501,
-                doubleIn: false,
-                doubleOut: true,
-                inputMode: 'field',
-                multiplierOrder: 'after',
-                autoSubmit: false,
-                language: defaultLang,
-                defaultPoints: 501
-            };
-            storage.setItem('settings', JSON.stringify(settings));
+            // Create default settings using centralized function
+            settings = window.getDefaultSettings();
+            window.saveSettings(settings);
         }
 
         // Load setup data (players for this game)
@@ -256,19 +246,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Set current language value in the select
         if (languageSelect) {
-            const settings = JSON.parse(storage.getItem('settings'));
+            const settings = window.loadSettings();
             if (settings && settings.language) {
                 languageSelect.value = settings.language;
             }
         }
 
-        // Settings modal event listeners
-        closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
-        settingsModal.addEventListener('click', (e) => {
-            if (e.target === settingsModal) {
-                settingsModal.classList.add('hidden');
-            }
-        });
+        // Note: Close button and click-outside listeners are now in settings-modal-loader.js
+
+        // Settings change event listeners
         doubleInCheck.addEventListener('change', (e) => {
             state.doubleIn = e.target.checked;
             // Update settings in localStorage
@@ -288,10 +274,8 @@ document.addEventListener('DOMContentLoaded', () => {
             state.pendingMultiplier = null; // Clear pending multiplier
             // Update settings in localStorage
             updateSettings();
-            // Show/hide multiplier order selector
-            toggleMultiplierOrderVisibility();
-            // Show/hide auto-submit based on mode
-            toggleAutoSubmitVisibility();
+            // Update visibility using global functions
+            window.updateSettingsVisibility(state.inputMode, state.multiplierOrder);
             renderKeypad();
             render();
         });
@@ -303,8 +287,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.currentTurn = []; // Clear current turn when switching modes
                 // Update settings in localStorage
                 updateSettings();
-                // Show/hide auto-submit based on multiplier order
-                toggleAutoSubmitVisibility();
+                // Update auto-submit visibility using global function
+                window.toggleAutoSubmitVisibility(state.inputMode, state.multiplierOrder);
                 renderKeypad();
                 render();
             });
@@ -319,28 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function toggleMultiplierOrderVisibility() {
-        const container = get('multiplier-order-container');
-        if (container) {
-            if (state.inputMode === 'field') {
-                container.style.display = 'block';
-            } else {
-                container.style.display = 'none';
-            }
-        }
-    }
-
-    function toggleAutoSubmitVisibility() {
-        const container = get('auto-submit-container');
-        if (container) {
-            // Only show auto-submit when in field mode AND 'before' multiplier order
-            if (state.inputMode === 'field' && state.multiplierOrder === 'before') {
-                container.style.display = 'flex';
-            } else {
-                container.style.display = 'none';
-            }
-        }
-    }
 
     // Initialize settings modal (should be loaded synchronously by now)
     initSettingsModalListeners();
@@ -745,38 +707,26 @@ document.addEventListener('DOMContentLoaded', () => {
         storage.removeItem('gameState');
         storage.removeItem('setupData'); // Clear setup data to force new player input
 
-        // Update settings with current game settings
+        // Update settings with current game settings using centralized function
         updateSettings();
 
         navigateToSetup();
     }
 
     function updateSettings() {
-        // Update only the settings in localStorage, not the game state
-        let currentSettings = JSON.parse(storage.getItem('settings'));
-        if (!currentSettings) {
-            // Get language from settings if exists, otherwise default
-            const existingSettings = JSON.parse(storage.getItem('settings'));
-            currentSettings = {
-                doubleIn: false,
-                doubleOut: true,
-                inputMode: 'field',
-                multiplierOrder: 'after',
-                autoSubmit: false,
-                language: existingSettings?.language || 'de',
-                defaultPoints: 501
-            };
-        }
+        // Update settings in localStorage using centralized function
+        // Preserve language and defaultPoints from existing settings
+        const currentSettings = window.getSettingsOrDefaults();
 
-        // Update game-related settings, but preserve language
-        currentSettings.doubleIn = state.doubleIn;
-        currentSettings.doubleOut = state.doubleOut;
-        currentSettings.inputMode = state.inputMode;
-        currentSettings.multiplierOrder = state.multiplierOrder || 'after';
-        currentSettings.autoSubmit = state.autoSubmit || false;
-        // Keep existing language and defaultPoints
-
-        storage.setItem('settings', JSON.stringify(currentSettings));
+        window.updateSettings({
+            doubleIn: state.doubleIn,
+            doubleOut: state.doubleOut,
+            inputMode: state.inputMode,
+            multiplierOrder: state.multiplierOrder || 'after',
+            autoSubmit: state.autoSubmit || false,
+            language: currentSettings.language,
+            defaultPoints: currentSettings.defaultPoints
+        });
     }
 
     function saveState() {
@@ -1157,37 +1107,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Update checkbox states from current game state
-        if (doubleInCheck) doubleInCheck.checked = state.doubleIn;
-        if (doubleOutCheck) doubleOutCheck.checked = state.doubleOut;
+        // Create a settings object from current game state
+        const currentSettings = window.getSettingsOrDefaults();
+        const stateSettings = {
+            doubleIn: state.doubleIn,
+            doubleOut: state.doubleOut,
+            inputMode: state.inputMode,
+            multiplierOrder: state.multiplierOrder || 'after',
+            autoSubmit: state.autoSubmit || false,
+            language: currentSettings.language
+        };
 
-        // Set input mode from current game state
-        if (inputModeSelect) {
-            inputModeSelect.value = state.inputMode;
-        }
-
-        // Set multiplier order from current game state
-        if (multiplierOrderSelect) {
-            multiplierOrderSelect.value = state.multiplierOrder || 'after';
-        }
-
-        // Set auto-submit from current game state
-        if (autoSubmitCheck) {
-            autoSubmitCheck.checked = state.autoSubmit || false;
-        }
-
-        // Show/hide multiplier order based on input mode
-        toggleMultiplierOrderVisibility();
-
-        // Show/hide auto-submit based on input mode and multiplier order
-        toggleAutoSubmitVisibility();
-
-        // Set current language in dropdown (already populated by localization.js)
-        const settings = JSON.parse(storage.getItem('settings'));
-        const currentLang = settings && settings.language ? settings.language : 'en';
-        if (languageSelect) {
-            languageSelect.value = currentLang;
-        }
+        // Use global helper to load settings into modal
+        window.loadSettingsIntoModal(stateSettings);
 
         settingsModal.classList.remove('hidden');
     }

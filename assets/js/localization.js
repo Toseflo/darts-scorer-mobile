@@ -151,20 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update the HTML lang attribute
         document.documentElement.lang = lang;
 
-        // Update language in settings
-        let settings = JSON.parse(storage.getItem('settings'));
-        if (!settings) {
-            settings = {
-                doubleIn: false,
-                doubleOut: true,
-                inputMode: 'field',
-                language: lang,
-                defaultPoints: 501
-            };
-        } else {
-            settings.language = lang;
-        }
-        storage.setItem('settings', JSON.stringify(settings));
+        // Update language in settings using centralized function
+        window.updateSettings({ language: lang });
 
         // Update language select
         const langSelect = document.getElementById('language-select');
@@ -172,14 +160,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const getTranslation = (key) => {
-        const settings = JSON.parse(storage.getItem('settings'));
+        const settings = window.loadSettings();
         const lang = settings && settings.language ? settings.language : 'en';
         return (translations[lang] && translations[lang][key]) || key;
     };
 
 
     const getInitialLanguage = () => {
-        const settings = JSON.parse(storage.getItem('settings'));
+        const settings = window.loadSettings();
         if (settings && settings.language) {
             return settings.language;
         }

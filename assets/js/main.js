@@ -20,95 +20,76 @@ document.addEventListener('DOMContentLoaded', async () => {
     let settingsModal = document.getElementById('settings-modal');
     let closeModalBtn = document.getElementById('close-modal-btn');
 
+    // Define updateSetupSettings before it's used in event listeners
+    const updateSetupSettings = () => {
+        // Use centralized function to save settings from modal
+        window.saveSettingsFromModal();
+    };
+
     // Initialize settings modal elements
     const initSettingsModal = () => {
         settingsModal = document.getElementById('settings-modal');
         closeModalBtn = document.getElementById('close-modal-btn');
 
         if (settingsModal && closeModalBtn) {
-            // Load saved settings if they exist
-            const savedSettings = JSON.parse(storage.getItem('settings'));
-
-            const doubleInCheck = document.getElementById('double-in-check');
-            const doubleOutCheck = document.getElementById('double-out-check');
-            const inputModeSelect = document.getElementById('input-mode-select');
+            // Load saved settings using centralized function
+            const savedSettings = window.loadSettings();
 
             if (savedSettings) {
-                // Apply saved settings
-                if (doubleInCheck) doubleInCheck.checked = savedSettings.doubleIn || false;
-                if (doubleOutCheck) doubleOutCheck.checked = savedSettings.doubleOut !== undefined ? savedSettings.doubleOut : true;
-                if (inputModeSelect) inputModeSelect.value = savedSettings.inputMode || 'field';
-
-                // Set default points if available
+                // Use global helper function to load settings into modal
                 const gamePointsInput = document.getElementById('game-points');
-                if (gamePointsInput && savedSettings.defaultPoints) {
-                    gamePointsInput.value = savedSettings.defaultPoints;
-                }
+                window.loadSettingsIntoModal(savedSettings, { gamePointsInput });
             } else {
                 // Set default values only if no saved settings
+                const doubleOutCheck = document.getElementById('double-out-check');
                 if (doubleOutCheck && !doubleOutCheck.hasAttribute('data-initialized')) {
                     doubleOutCheck.checked = true;
                     doubleOutCheck.setAttribute('data-initialized', 'true');
                 }
+                // Update visibility with defaults
+                window.updateSettingsVisibility('field', 'before');
             }
+
+            // Get references to all settings elements for event listeners
+            const doubleInCheck = document.getElementById('double-in-check');
+            const doubleOutCheck = document.getElementById('double-out-check');
+            const inputModeSelect = document.getElementById('input-mode-select');
+            const multiplierOrderSelect = document.getElementById('multiplier-order-select');
+            const autoSubmitCheck = document.getElementById('auto-submit-check');
 
             // Add event listeners to save settings when changed
             if (doubleInCheck) {
-                doubleInCheck.addEventListener('change', () => {
-                    updateSetupSettings();
-                });
+                doubleInCheck.addEventListener('change', updateSetupSettings);
             }
             if (doubleOutCheck) {
-                doubleOutCheck.addEventListener('change', () => {
-                    updateSetupSettings();
-                });
+                doubleOutCheck.addEventListener('change', updateSetupSettings);
             }
             if (inputModeSelect) {
                 inputModeSelect.addEventListener('change', () => {
                     updateSetupSettings();
+                    // Update visibility when input mode changes
+                    const multiplierOrder = multiplierOrderSelect ? multiplierOrderSelect.value : 'after';
+                    window.updateSettingsVisibility(inputModeSelect.value, multiplierOrder);
                 });
             }
+            if (multiplierOrderSelect) {
+                multiplierOrderSelect.addEventListener('change', () => {
+                    updateSetupSettings();
+                    // Update visibility when multiplier order changes
+                    const inputMode = inputModeSelect ? inputModeSelect.value : 'field';
+                    window.updateSettingsVisibility(inputMode, multiplierOrderSelect.value);
+                });
+            }
+            if (autoSubmitCheck) {
+                autoSubmitCheck.addEventListener('change', updateSetupSettings);
+            }
 
-            closeModalBtn.addEventListener('click', () => {
-                settingsModal.classList.add('hidden');
-            });
-
-            window.addEventListener('click', (event) => {
-                if (event.target === settingsModal) {
-                    settingsModal.classList.add('hidden');
-                }
-            });
+            // Note: Close button and click-outside listeners are now in settings-modal-loader.js
         }
     };
 
     // Initialize modal (should be loaded synchronously by now)
     initSettingsModal();
-
-    const updateSetupSettings = () => {
-        const doubleInCheck = document.getElementById('double-in-check');
-        const doubleOutCheck = document.getElementById('double-out-check');
-        const inputModeSelect = document.getElementById('input-mode-select');
-
-        let currentSettings = JSON.parse(storage.getItem('settings'));
-        if (!currentSettings) {
-            // Create default settings if none exist - use browser language or fallback to 'en'
-            const defaultLang = window.getInitialLanguage ? window.getInitialLanguage() : (navigator.language.split('-')[0] || 'en');
-            currentSettings = {
-                doubleIn: false,
-                doubleOut: true,
-                inputMode: 'field',
-                language: defaultLang,
-                defaultPoints: 501
-            };
-        }
-
-        // Update settings with current values
-        if (doubleInCheck) currentSettings.doubleIn = doubleInCheck.checked;
-        if (doubleOutCheck) currentSettings.doubleOut = doubleOutCheck.checked;
-        if (inputModeSelect) currentSettings.inputMode = inputModeSelect.value;
-
-        storage.setItem('settings', JSON.stringify(currentSettings));
-    };
 
     const createPlayerInput = (playerNumber) => {
         const playerDiv = document.createElement('div');
@@ -143,6 +124,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     settingsBtn.addEventListener('click', () => {
         if (settingsModal) {
             settingsModal.classList.remove('hidden');
+
+            // Update visibility when opening modal
+            const inputModeSelect = document.getElementById('input-mode-select');
+            const multiplierOrderSelect = document.getElementById('multiplier-order-select');
+            const inputMode = inputModeSelect ? inputModeSelect.value : 'field';
+            const multiplierOrder = multiplierOrderSelect ? multiplierOrderSelect.value : 'after';
+            window.updateSettingsVisibility(inputMode, multiplierOrder);
         }
     });
 
@@ -159,23 +147,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const doubleInCheck = document.getElementById('double-in-check');
-        const doubleOutCheck = document.getElementById('double-out-check');
-        const inputModeSelect = document.getElementById('input-mode-select');
-
         // Get current language from existing settings or default
-        const currentSettings = JSON.parse(storage.getItem('settings'));
-        const currentLanguage = currentSettings && currentSettings.language ? currentSettings.language : 'de';
+        const currentSettings = window.getSettingsOrDefaults();
+        const currentLanguage = currentSettings.language;
 
-        // Save user preferences (persistent settings)
-        const userSettings = {
-            doubleIn: doubleInCheck ? doubleInCheck.checked : false,
-            doubleOut: doubleOutCheck ? doubleOutCheck.checked : true,
-            inputMode: inputModeSelect ? inputModeSelect.value : 'field',
+        // Save user preferences using centralized function
+        const defaultPoints = parseInt(document.getElementById('game-points').value, 10);
+        window.saveSettingsFromModal({
             language: currentLanguage,
-            defaultPoints: parseInt(document.getElementById('game-points').value, 10)
-        };
-        storage.setItem('settings', JSON.stringify(userSettings));
+            defaultPoints: defaultPoints
+        });
 
         // Save setup data for this specific game (temporary)
         const setupData = {
