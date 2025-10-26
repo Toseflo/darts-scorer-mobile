@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsGameBtn = get('settings-game-btn');
 
     // Settings modal elements - will be initialized after modal is loaded
-    let settingsModal, closeSettingsBtn, doubleInCheck, doubleOutCheck, languageSelect, inputModeSelect;
+    let settingsModal, closeSettingsBtn, doubleInCheck, doubleOutCheck, languageSelect, inputModeSelect, multiplierOrderSelect, autoSubmitCheck;
 
     // --- Game State ---
     let state = {};
@@ -87,6 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 doubleIn: false,
                 doubleOut: true,
                 inputMode: 'field',
+                multiplierOrder: 'after',
+                autoSubmit: false,
                 language: defaultLang,
                 defaultPoints: 501
             };
@@ -133,6 +135,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     state = savedState;
                     state.showError = false;
                     state.showInvalidInputError = state.showInvalidInputError || false;
+                    // Ensure multiplierOrder exists (for backward compatibility)
+                    if (!state.multiplierOrder) {
+                        state.multiplierOrder = settings.multiplierOrder || 'after';
+                    }
+                    // Ensure autoSubmit exists (for backward compatibility)
+                    if (state.autoSubmit === undefined) {
+                        state.autoSubmit = settings.autoSubmit || false;
+                    }
+                    // Always start with no pending multiplier
+                    state.pendingMultiplier = null;
                 } else {
                     // User clicked No - delete saved game
                     storage.removeItem('gameState');
@@ -160,6 +172,9 @@ document.addEventListener('DOMContentLoaded', () => {
             doubleOut: settings.doubleOut,
             nextPlayerMode: 'next',
             inputMode: settings.inputMode,
+            multiplierOrder: settings.multiplierOrder || 'after',
+            autoSubmit: settings.autoSubmit || false,
+            pendingMultiplier: null, // For 'before' mode - stores the multiplier to apply
             players: setupData.players.map(name => createPlayer(name, parseInt(setupData.points, 10))),
             currentPlayerIndex: 0,
             legStarterIndex: 0,
@@ -231,6 +246,8 @@ document.addEventListener('DOMContentLoaded', () => {
         doubleOutCheck = get('double-out-check');
         languageSelect = get('language-select');
         inputModeSelect = get('input-mode-select');
+        multiplierOrderSelect = get('multiplier-order-select');
+        autoSubmitCheck = get('auto-submit-check');
 
         if (!settingsModal || !closeSettingsBtn || !doubleInCheck || !doubleOutCheck || !inputModeSelect) {
             console.error('Settings modal elements not found');
@@ -268,11 +285,61 @@ document.addEventListener('DOMContentLoaded', () => {
             state.inputMode = e.target.value;
             scoreInputBuffer = ''; // Clear buffer when switching modes
             state.currentTurn = []; // Clear current turn when switching modes
+            state.pendingMultiplier = null; // Clear pending multiplier
             // Update settings in localStorage
             updateSettings();
+            // Show/hide multiplier order selector
+            toggleMultiplierOrderVisibility();
+            // Show/hide auto-submit based on mode
+            toggleAutoSubmitVisibility();
             renderKeypad();
             render();
         });
+
+        if (multiplierOrderSelect) {
+            multiplierOrderSelect.addEventListener('change', (e) => {
+                state.multiplierOrder = e.target.value;
+                state.pendingMultiplier = null; // Clear pending multiplier when changing mode
+                state.currentTurn = []; // Clear current turn when switching modes
+                // Update settings in localStorage
+                updateSettings();
+                // Show/hide auto-submit based on multiplier order
+                toggleAutoSubmitVisibility();
+                renderKeypad();
+                render();
+            });
+        }
+
+        if (autoSubmitCheck) {
+            autoSubmitCheck.addEventListener('change', (e) => {
+                state.autoSubmit = e.target.checked;
+                // Update settings in localStorage
+                updateSettings();
+            });
+        }
+    }
+
+    function toggleMultiplierOrderVisibility() {
+        const container = get('multiplier-order-container');
+        if (container) {
+            if (state.inputMode === 'field') {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+    }
+
+    function toggleAutoSubmitVisibility() {
+        const container = get('auto-submit-container');
+        if (container) {
+            // Only show auto-submit when in field mode AND 'before' multiplier order
+            if (state.inputMode === 'field' && state.multiplierOrder === 'before') {
+                container.style.display = 'flex';
+            } else {
+                container.style.display = 'none';
+            }
+        }
     }
 
     // Initialize settings modal (should be loaded synchronously by now)
@@ -365,20 +432,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleScoreInput(value) {
         if (state.currentTurn.length >= 3) return;
-        state.currentTurn.push({ value, multiplier: 1, score: value });
+
+        let multiplier = 1;
+
+        // In 'before' mode, use pending multiplier if set
+        if (state.multiplierOrder === 'before' && state.pendingMultiplier) {
+            multiplier = state.pendingMultiplier;
+            // Handle special case: T25 is not possible
+            if (value === 25 && multiplier === 3) {
+                multiplier = 2;
+            }
+            // Clear pending multiplier after use
+            state.pendingMultiplier = null;
+        }
+
+        const score = value * multiplier;
+        state.currentTurn.push({ value, multiplier, score });
         state.showError = false; // Hide error when user enters a dart
+        renderKeypad(); // Re-render keypad to update button states
         render();
+
+        // Auto-submit after third dart if enabled and in 'before' mode
+        if (state.autoSubmit && state.multiplierOrder === 'before' && state.currentTurn.length === 3) {
+            // Small delay to let the UI update before submitting
+            setTimeout(() => {
+                submitTurn();
+            }, 500);
+        }
     }
 
     function applyMultiplier(newMultiplier) {
-        if (state.currentTurn.length === 0) return;
-        const lastDart = state.currentTurn[state.currentTurn.length - 1];
-        if (lastDart.value === 0) return; // No multiplier on MISS
-        if (lastDart.value === 25 && newMultiplier === 3) newMultiplier = 2; // T25 is not possible
+        if (state.multiplierOrder === 'before') {
+            // In 'before' mode, toggle the pending multiplier (highlight mode)
+            if (state.pendingMultiplier === newMultiplier) {
+                state.pendingMultiplier = null; // Deactivate if clicking the same button
+            } else {
+                state.pendingMultiplier = newMultiplier; // Activate the multiplier
+            }
+            renderKeypad(); // Re-render to show highlighted state
+            render();
+        } else {
+            // In 'after' mode, modify the last dart
+            if (state.currentTurn.length === 0) return;
+            const lastDart = state.currentTurn[state.currentTurn.length - 1];
+            if (lastDart.value === 0) return; // No multiplier on MISS
+            if (lastDart.value === 25 && newMultiplier === 3) newMultiplier = 2; // T25 is not possible
 
-        lastDart.multiplier = (lastDart.multiplier === newMultiplier) ? 1 : newMultiplier;
-        lastDart.score = lastDart.value * lastDart.multiplier;
-        render();
+            lastDart.multiplier = (lastDart.multiplier === newMultiplier) ? 1 : newMultiplier;
+            lastDart.score = lastDart.value * lastDart.multiplier;
+            render();
+        }
     }
     function handleUndo() {
         // In score mode, undo works differently
@@ -404,12 +507,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.currentTurn.length > 0) {
             // Remove last dart from current turn
             state.currentTurn.pop();
+            state.pendingMultiplier = null; // Clear pending multiplier
+            renderKeypad(); // Re-render to update button states
             render();
         } else if (previousState !== null) {
             // Restore previous player's turn if current turn is empty
             state = JSON.parse(JSON.stringify(previousState));
             previousState = null;
             saveState();
+            renderKeypad();
             render();
         }
     }
@@ -452,6 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Clear error flag
         state.showError = false;
+        state.pendingMultiplier = null; // Clear any pending multiplier
 
         // Save state before modification to allow undo
         previousState = JSON.parse(JSON.stringify(state));
@@ -515,7 +622,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         state.currentTurn = [];
+        state.pendingMultiplier = null;
         saveState();
+        renderKeypad();
         render();
     }
 
@@ -534,9 +643,11 @@ document.addEventListener('DOMContentLoaded', () => {
             p.hasDoubledIn = false;
         });
         state.currentTurn = [];
+        state.pendingMultiplier = null;
         state.showError = false;
         gameOverModal.classList.add('hidden');
         saveState();
+        renderKeypad();
         render();
     }
 
@@ -560,6 +671,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 doubleIn: false,
                 doubleOut: true,
                 inputMode: 'field',
+                multiplierOrder: 'after',
+                autoSubmit: false,
                 language: existingSettings?.language || 'de',
                 defaultPoints: 501
             };
@@ -569,6 +682,8 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSettings.doubleIn = state.doubleIn;
         currentSettings.doubleOut = state.doubleOut;
         currentSettings.inputMode = state.inputMode;
+        currentSettings.multiplierOrder = state.multiplierOrder || 'after';
+        currentSettings.autoSubmit = state.autoSubmit || false;
         // Keep existing language and defaultPoints
 
         storage.setItem('settings', JSON.stringify(currentSettings));
@@ -633,11 +748,15 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         } else {
             // Field input mode: original layout
+            // Add 'active' class to multiplier buttons if they are pending in 'before' mode
+            const tripleActive = (state.multiplierOrder === 'before' && state.pendingMultiplier === 3) ? 'multiplier-active' : '';
+            const doubleActive = (state.multiplierOrder === 'before' && state.pendingMultiplier === 2) ? 'multiplier-active' : '';
+
             keypadGrid.className = 'space-y-1.5';
             keypadGrid.innerHTML = `
                 <div class="grid grid-cols-2 gap-1.5">
-                    <button data-multiplier="3" class="multiplier-btn keypad-btn btn-triple text-lg font-bold py-3 rounded-lg" data-i18n="tripple">TRIPLE</button>
-                    <button data-multiplier="2" class="multiplier-btn keypad-btn btn-double text-lg font-bold py-3 rounded-lg" data-i18n="double">DOPPEL</button>
+                    <button data-multiplier="3" class="multiplier-btn keypad-btn btn-triple text-lg font-bold py-3 rounded-lg ${tripleActive}" data-i18n="tripple">TRIPLE</button>
+                    <button data-multiplier="2" class="multiplier-btn keypad-btn btn-double text-lg font-bold py-3 rounded-lg ${doubleActive}" data-i18n="double">DOPPEL</button>
                 </div>
                 <div class="grid grid-cols-4 gap-1.5">
                     <button data-number="17" class="keypad-btn number-btn text-xl font-bold py-3 rounded-lg">17</button>
@@ -956,6 +1075,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inputModeSelect) {
             inputModeSelect.value = state.inputMode;
         }
+
+        // Set multiplier order from current game state
+        if (multiplierOrderSelect) {
+            multiplierOrderSelect.value = state.multiplierOrder || 'after';
+        }
+
+        // Set auto-submit from current game state
+        if (autoSubmitCheck) {
+            autoSubmitCheck.checked = state.autoSubmit || false;
+        }
+
+        // Show/hide multiplier order based on input mode
+        toggleMultiplierOrderVisibility();
+
+        // Show/hide auto-submit based on input mode and multiplier order
+        toggleAutoSubmitVisibility();
 
         // Set current language in dropdown (already populated by localization.js)
         const settings = JSON.parse(storage.getItem('settings'));

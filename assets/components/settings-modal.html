@@ -22,13 +22,33 @@
                 </div>
             </div>
             <div class="border-t modal-divider my-4"></div>
+            <!-- Input Mode Selector -->
             <div>
-                <label for="input-mode-select" class="block text-sm modal-label mb-1" data-i18n="input_mode">Eingabemodus</label>
                 <p class="modal-description text-xs mb-2" data-i18n="input_mode_desc">Wählen Sie, wie Sie Ihre Würfe eingeben möchten.</p>
+                <label for="input-mode-select" class="block text-sm modal-label mb-1" data-i18n="input_mode">Eingabemodus</label>
                 <select id="input-mode-select" class="select-field block w-full shadow-sm py-2 px-3 focus:outline-none">
                     <option value="field" data-i18n="input_mode_field">Feld-Eingabe</option>
                     <option value="score" data-i18n="input_mode_score">Punktzahl-Eingabe</option>
                 </select>
+            </div>
+            <!-- Multiplier Order Setting (only visible in field input mode) -->
+            <div id="multiplier-order-container">
+                <p class="modal-description text-xs mb-2" data-i18n="multiplier_order_desc">Wählen Sie, wann Triple/Double-Tasten gedrückt werden.</p>
+                <label for="multiplier-order-select" class="block text-sm modal-label mb-1" data-i18n="multiplier_order">Triple/Double-Reihenfolge</label>
+                <select id="multiplier-order-select" class="select-field block w-full shadow-sm py-2 px-3 focus:outline-none">
+                    <option value="after" data-i18n="multiplier_after">Nach der Zahl (vorherige ändern)</option>
+                    <option value="before" data-i18n="multiplier_before">Vor der Zahl (Leuchtmodus)</option>
+                </select>
+            </div>
+            <!-- Auto-submit Setting (only visible in 'before' mode) -->
+            <div id="auto-submit-container" class="relative flex items-start">
+                <div class="flex items-center h-5">
+                    <input id="auto-submit-check" type="checkbox" class="modal-checkbox">
+                </div>
+                <div class="ml-3 text-sm">
+                    <label for="auto-submit-check" class="modal-label" data-i18n="auto_submit">Auto-Wechsel nach 3 Darts</label>
+                    <p class="modal-description" data-i18n="auto_submit_desc">Automatisch zum nächsten Spieler wechseln nach Eingabe des dritten Darts.</p>
+                </div>
             </div>
             <div class="border-t modal-divider my-4"></div>
             <div>

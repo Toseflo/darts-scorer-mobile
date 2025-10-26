@@ -45,6 +45,12 @@
     "input_mode_score": "Punktzahl-Eingabe",
     "input_mode_desc": "Wählen Sie, wie Sie Ihre Würfe eingeben möchten.",
     "tap_for_all_players": "👥 Tippen für alle",
-    "error_invalid_score": "Bitte Zahl zwischen 0 und 180 eingeben!"
+    "error_invalid_score": "Bitte Zahl zwischen 0 und 180 eingeben!",
+    "multiplier_order": "Triple/Double-Reihenfolge",
+    "multiplier_order_desc": "Wählen Sie, wann Triple/Double-Tasten gedrückt werden.",
+    "multiplier_before": "Vor der Zahl",
+    "multiplier_after": "Nach der Zahl",
+    "auto_submit": "Auto-Wechsel nach 3 Darts",
+    "auto_submit_desc": "Automatisch zum nächsten Spieler wechseln nach Eingabe des dritten Darts."
 }
 

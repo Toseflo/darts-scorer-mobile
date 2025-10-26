@@ -73,9 +73,21 @@
     color: var(--color-accent-violet);
 }
 
+.btn-triple.multiplier-active {
+    background-color: var(--color-accent-violet);
+    color: var(--color-text-primary);
+    box-shadow: 0 0 15px var(--color-accent-violet);
+}
+
 .btn-double {
     background-color: var(--color-bg-input);
     color: var(--color-accent-emerald);
+}
+
+.btn-double.multiplier-active {
+    background-color: var(--color-accent-emerald);
+    color: var(--color-text-primary);
+    box-shadow: 0 0 15px var(--color-accent-emerald);
 }
 
 .number-btn {

@@ -45,6 +45,12 @@
     "input_mode_score": "Score Input",
     "input_mode_desc": "Choose how you want to enter your throws.",
     "tap_for_all_players": "👥 Tap for all",
-    "error_invalid_score": "Please enter a number between 0 and 180!"
+    "error_invalid_score": "Please enter a number between 0 and 180!",
+    "multiplier_order": "Triple/Double Order",
+    "multiplier_order_desc": "Choose when to press Triple/Double buttons.",
+    "multiplier_before": "Before number",
+    "multiplier_after": "After number",
+    "auto_submit": "Auto-submit after 3 darts",
+    "auto_submit_desc": "Automatically switch to next player after entering the third dart."
 }
 
