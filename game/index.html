@@ -113,7 +113,9 @@
 
         <!-- Game Over Modal -->
         <div id="game-over-modal" class="hidden modal-overlay">
-            <div class="modal-box modal-box-centered">
+            <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+            <div class="modal-box modal-box-centered winner-modal">
+                <div class="winner-trophy">🏆</div>
                 <h2 id="winner-name" class="winner-name"></h2>
                 <p id="game-over-text" class="game-over-message" data-i18n="game_over_won">hat das Leg gewonnen!</p>
                 <div class="space-y-3">

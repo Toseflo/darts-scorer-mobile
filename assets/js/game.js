@@ -631,6 +631,96 @@ document.addEventListener('DOMContentLoaded', () => {
     function showWinner(name) {
         winnerNameEl.textContent = name;
         gameOverModal.classList.remove('hidden');
+
+        // Start confetti animation
+        startConfetti();
+    }
+
+    // Confetti animation
+    function startConfetti() {
+        const canvas = document.getElementById('confetti-canvas');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const confettiPieces = [];
+        const confettiCount = 150;
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
+
+        class Confetti {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height - canvas.height;
+                this.size = Math.random() * 10 + 5;
+                this.speedY = Math.random() * 3 + 2;
+                this.speedX = Math.random() * 2 - 1;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 10 - 5;
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                this.rotation += this.rotationSpeed;
+
+                // Reset if off screen
+                if (this.y > canvas.height) {
+                    this.y = -20;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        // Create confetti pieces
+        for (let i = 0; i < confettiCount; i++) {
+            confettiPieces.push(new Confetti());
+        }
+
+        let animationId;
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            confettiPieces.forEach(piece => {
+                piece.update();
+                piece.draw();
+            });
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Stop confetti after 10 seconds or when modal is closed
+        const stopConfetti = () => {
+            cancelAnimationFrame(animationId);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        };
+
+        setTimeout(stopConfetti, 10000);
+
+        // Also stop when modal is hidden
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.target.classList.contains('hidden')) {
+                    stopConfetti();
+                    observer.disconnect();
+                }
+            });
+        });
+
+        observer.observe(gameOverModal, { attributes: true, attributeFilter: ['class'] });
     }
 
     function startNextLeg() {
