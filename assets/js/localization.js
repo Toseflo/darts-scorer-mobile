@@ -138,6 +138,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const key = element.getAttribute('data-i18n-placeholder');
             if (translations[lang] && translations[lang][key]) {
                 element.placeholder = translations[lang][key];
+
+                // Update value for player inputs if they have data-player-number
+                const playerNumber = element.getAttribute('data-player-number');
+                if (playerNumber) {
+                    const currentValue = element.value;
+                    const numberPattern = new RegExp(`^(.+)\\s+${playerNumber}$`);
+                    if (numberPattern.test(currentValue)) {
+                        // Update the value with the new translation
+                        element.value = `${translations[lang][key]} ${playerNumber}`;
+                    }
+                }
             }
         });
     };

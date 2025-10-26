@@ -133,6 +133,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (state.autoSubmit === undefined) {
                         state.autoSubmit = settings.autoSubmit || false;
                     }
+                    // Ensure all players have an ID (for backward compatibility)
+                    state.players.forEach((player, index) => {
+                        if (player.id === undefined) {
+                            player.id = index;
+                        }
+                    });
                     // Always start with no pending multiplier
                     state.pendingMultiplier = null;
                 } else {
@@ -165,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
             multiplierOrder: settings.multiplierOrder || 'after',
             autoSubmit: settings.autoSubmit || false,
             pendingMultiplier: null, // For 'before' mode - stores the multiplier to apply
-            players: setupData.players.map(name => createPlayer(name, parseInt(setupData.points, 10))),
+            players: setupData.players.map((name, index) => createPlayer(name, parseInt(setupData.points, 10), index)),
             currentPlayerIndex: 0,
             legStarterIndex: 0,
             currentTurn: [],
@@ -174,8 +180,9 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    function createPlayer(name, score) {
+    function createPlayer(name, score, id) {
         return {
+            id: id, // Unique identifier for each player
             name: name,
             score: score,
             legs: 0,
@@ -1082,7 +1089,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         sortedPlayers.forEach((player, index) => {
             const li = document.createElement('li');
-            const isCurrent = player.name === state.players[state.currentPlayerIndex].name;
+            const isCurrent = player.id === state.players[state.currentPlayerIndex].id;
             li.className = `flex justify-between p-3 bg-gray-700 rounded-md text-lg ${isCurrent ? 'border-2 border-blue-500' : ''}`;
             li.innerHTML = `
                 <span class="truncate pr-4">${isCurrent ? '🎯' : `${index + 1}.`} ${player.name}</span>

@@ -94,9 +94,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const createPlayerInput = (playerNumber) => {
         const playerDiv = document.createElement('div');
         playerDiv.className = 'flex items-center space-x-2';
-        const placeholderText = `Spieler ${playerNumber}`;
+        const translations = window.translations || {};
+        const playerPlaceholder = translations.player_placeholder || 'Player';
+        const placeholderText = `${playerPlaceholder} ${playerNumber}`;
         playerDiv.innerHTML = `
-            <input type="text" value="${placeholderText}" class="input-field" data-i18n-placeholder="player_placeholder" placeholder="${placeholderText}" autocomplete="off">
+            <input type="text" value="${placeholderText}" class="input-field" data-i18n-placeholder="player_placeholder" data-player-number="${playerNumber}" placeholder="${placeholderText}" autocomplete="off">
             <button class="remove-player-btn">
                 <svg class="h-6 w-6" viewBox="0 0 24 24" stroke="currentColor" style="fill: none;">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
